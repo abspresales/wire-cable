@@ -18,12 +18,12 @@ body{font-family:Arial,"Microsoft YaHei",sans-serif;background:#f0f2f5;color:#33
 .sub-tab-item.active{color:#1a56db;background:#eff6ff;font-weight:600;}
 .sub-page{display:none;}
 .sub-page.active{display:block;}
-.filter-bar{background:#fff;padding:18px 24px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
-.filter-item{display:flex;align-items:center;gap:8px;}
-.filter-item label{font-size:13px;color:#374151;font-weight:700;white-space:nowrap;margin-right:6px;}
+.filter-bar{background:#fff;padding:14px 14px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
+.filter-item{display:flex;align-items:center;gap:5px;flex:1 1 auto;min-width:0;}
+.filter-item label{font-size:13px;color:#374151;font-weight:700;white-space:nowrap;margin-right:3px;}
 .filter-item select{padding:8px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;min-width:160px;background:#fff;cursor:pointer;transition:all 0.2s;}
 .filter-item select:disabled{background:#f0f0f0;color:#999;cursor:not-allowed;}
-.count-info{font-size:13px;color:#1a56db;font-weight:600;margin-left:auto;background:#eff6ff;padding:6px 14px;border-radius:20px;}
+.count-info{font-size:13px;color:#1a56db;font-weight:600;margin-left:auto;background:#eff6ff;padding:6px 12px;border-radius:20px;flex-shrink:0;white-space:nowrap;}
 .table-wrap{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;table-layout:auto;}
 th{background:#fff;color:#111827;padding:12px 14px;text-align:center;font-weight:700;white-space:nowrap;position:sticky;top:0;font-size:13px;border-bottom:2px solid #e5e7eb;}
@@ -38,10 +38,10 @@ tr:hover{background:#f8fafc;}
 .btn-green:hover{background:#047857;}
 .btn-secondary{background:#6c757d;color:#fff;}
 .btn-secondary:hover{background:#545b62;}
-.btn-reset{background:#fff;color:#1a56db;border:1px solid #1a56db;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;}
+.btn-reset{background:#fff;color:#1a56db;border:1px solid #1a56db;padding:7px 12px;display:inline-flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap;}
 .btn-reset:hover{background:#eff6ff;}
 .btn-reset:active{background:#dbeafe;}
-.btn-export{background:#1a56db;color:#fff;border:1px solid #1a56db;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;}
+.btn-export{background:#1a56db;color:#fff;border:1px solid #1a56db;padding:7px 12px;display:inline-flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap;}
 .btn-export:hover{background:#1548b8;}
 .btn-export:active{background:#0f3a99;}
 .admin-header{background:#fff;padding:18px 24px;border-radius:10px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
@@ -124,8 +124,8 @@ tr:hover{background:#f8fafc;}
 .searchable-select:focus{border-color:#1a56db;box-shadow:0 0 0 2px rgba(26,86,219,0.12);}
 .searchable-select:disabled{background:#f0f0f0;color:#999;cursor:not-allowed;}
 /* ===== 自定义可搜索下拉组件 ===== */
-.combobox{position:relative;width:100%;min-width:160px;}
-.combobox-input{width:100%;padding:8px 32px 8px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;background:#fff;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;outline:none;-webkit-appearance:none;appearance:none;-moz-appearance:none;}
+.combobox{position:relative;width:100%;min-width:0;flex:1 1 110px;}
+.combobox-input{width:100%;padding:7px 30px 7px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:13px;background:#fff;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;outline:none;-webkit-appearance:none;appearance:none;-moz-appearance:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .combobox-input:focus{border-color:#1a56db;box-shadow:none;cursor:text;}
 .combobox-input::-webkit-clear-button,
 .combobox-input::-webkit-inner-spin-button,
@@ -179,7 +179,7 @@ tr:hover{background:#f8fafc;}
   body>div[style*="linear-gradient"]{padding:14px 16px !important;}
   body>div[style*="linear-gradient"] h1{font-size:19px !important;}
   body>div[style*="linear-gradient"] p{font-size:12px !important;}
-  .filter-bar{padding:14px 16px;gap:10px 12px;align-items:stretch;}
+  .filter-bar{padding:14px 16px;gap:10px 12px;align-items:stretch;flex-wrap:wrap;overflow-x:visible;}
   .filter-item{flex:1 1 calc(50% - 6px);min-width:0;flex-direction:column;align-items:stretch;gap:4px;}
   .filter-item label{font-size:13px;margin-right:0;margin-bottom:2px;}
   .filter-item select,.filter-item input{width:100%;min-width:0;padding:10px 12px;font-size:14px;min-height:40px;}
@@ -455,10 +455,10 @@ function getQueryFiltered(){
     const t=getComboboxValue('qType');
     const l=getComboboxValue('qLength');
     const st=getComboboxValue('qStandard');
-    if(s&&s!=='全部系列')result=result.filter(r=>(r['产品系列']||'').includes(s));
-    if(t&&t!=='全部类型')result=result.filter(r=>(r['线材类型']||'').includes(t));
-    if(l&&l!=='全部长度')result=result.filter(r=>(r['线材长度']||'').includes(l));
-    if(st&&st!=='全部标准')result=result.filter(r=>(r['线材标准']||'').includes(st));
+    if(s&&s!=='全部系列')result=result.filter(r=>(String(r['产品系列']||'').trim())===s.trim());
+    if(t&&t!=='全部类型')result=result.filter(r=>(String(r['线材类型']||'').trim())===t.trim());
+    if(l&&l!=='全部长度')result=result.filter(r=>(String(r['线材长度']||'').trim())===l.trim());
+    if(st&&st!=='全部标准')result=result.filter(r=>(String(r['线材标准']||'').trim())===st.trim());
     // 全局关键词(AND)
     const keywords=getGlobalKeywords();
     if(keywords.length)result=result.filter(r=>rowMatchesKeyword(r,keywords));
@@ -554,7 +554,7 @@ function onClearAllFilters(){
     clearGlobalSearch(true);
 }
 let currentPage=1;
-const PAGE_SIZE=20;
+const PAGE_SIZE=10;
 function renderQueryTable(){
     const data=getQueryFiltered();
     const type=getComboboxValue('qType');
@@ -603,22 +603,42 @@ function renderPagination(total,totalPages){
 function goToPage(p){currentPage=p;renderQueryTable();window.scrollTo({top:document.querySelector('.table-wrap').offsetTop-20,behavior:'smooth'});}
 function prevPage(){if(currentPage>1){currentPage--;renderQueryTable();window.scrollTo({top:document.querySelector('.table-wrap').offsetTop-20,behavior:'smooth'});}}
 function nextPage(){const total=getQueryFiltered().length;const tp=Math.max(1,Math.ceil(total/PAGE_SIZE));if(currentPage<tp){currentPage++;renderQueryTable();window.scrollTo({top:document.querySelector('.table-wrap').offsetTop-20,behavior:'smooth'});}}
+function buildExportName(){
+    const s=getComboboxValue('qSeries');
+    const t=getComboboxValue('qType');
+    const series=(s&&s!=='全部系列')?s:'';
+    const type=(t&&t!=='全部类型')?t:'';
+    // 清洗文件名非法字符: \ / : * ? " < > | 以及首尾点、空格
+    const clean=v=>String(v||'').replace(/[\\\/:*?"<>|]+/g,'_').replace(/^[\s.]+|[\s.]+$/g,'').replace(/\s+/g,'_');
+    const seriesC=clean(series), typeC=clean(type);
+    let label;
+    if(seriesC&&typeC)label=seriesC+'_'+typeC;
+    else if(seriesC)label=seriesC+'_全部类型';
+    else if(typeC)label='全部系列_'+typeC;
+    else label='全部';
+    return '线材数据_'+label+'_'+new Date().toISOString().slice(0,10)+'.xls';
+}
 function exportExcel(){
     const data=getQueryFiltered();
     if(data.length===0){alert('没有可导出的数据');return;}
     const headers=RAW_FIELDS;
+    const FAMILY='font-family:微软雅黑,Microsoft YaHei,Arial,sans-serif;';
+    const FONT_TH=FAMILY+'font-size:11pt;';   // 表头(首行) 11号
+    const FONT_TD=FAMILY+'font-size:10pt;';   // 数据单元格 10号
+    // 物料描述居左,其余居中
+    const alignOf=h=>h==='物料描述'?'left':'center';
     let html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
     html+='<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>线材数据</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
-    html+='<table border="1"><tr>'+headers.map(h=>'<th style="background:#f0f7ff;color:#1e3a5f;font-weight:bold;padding:8px;">'+h+'</th>').join('')+'</tr>';
+    html+='<table border="1"><tr>'+headers.map(h=>'<th style="background:#f0f7ff;color:#1e3a5f;font-weight:bold;padding:8px;'+FONT_TH+'text-align:'+(alignOf(h))+';">'+h+'</th>').join('')+'</tr>';
     data.forEach(row=>{
-        html+='<tr>'+headers.map(h=>'<td style="padding:6px;border:1px solid #ddd;">'+String(row[h]||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</td>').join('')+'</tr>';
+        html+='<tr>'+headers.map(h=>'<td style="padding:6px;border:1px solid #ddd;'+FONT_TD+'text-align:'+(alignOf(h))+';">'+String(row[h]||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</td>').join('')+'</tr>';
     });
     html+='</table></body></html>';
     const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
-    a.download='标准线材数据_'+new Date().toISOString().slice(0,10)+'.xls';
+    a.download=buildExportName();
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
