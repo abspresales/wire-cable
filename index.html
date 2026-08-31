@@ -33,6 +33,7 @@ th{background:#fff;color:#111827;padding:12px 14px;text-align:center;font-weight
 td{padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;vertical-align:middle;white-space:nowrap;overflow:hidden;font-size:13px;}
 tr:hover{background:#f8fafc;}
 .col-desc{text-align:left;white-space:normal;line-height:1.6;min-width:200px;color:#333;}
+.col-model{text-align:center;white-space:normal;line-height:1.5;min-width:170px;color:#333;}
 .no-result{text-align:center;padding:40px;color:#999;font-size:13px;}
 .btn{padding:9px 20px;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500;transition:all 0.2s;}
 .btn-primary{background:#1a56db;color:#fff;}
@@ -580,7 +581,7 @@ function renderQueryTable(){
         const val=esc(raw);
         // 命中高亮(针对可扩展描述字段)
         const hl=(keywords.length&&(f==='物料描述'||f==='备注'||f==='产品型号'||f==='线材规格'))?highlightWord(raw,keywords):val;
-        const cls='class="'+(f==='物料描述'||f==='备注'?'col-desc':'')+'"';
+        const cls='class="'+(f==='物料描述'||f==='备注'?'col-desc':(f==='产品型号'?'col-model':''))+'"';
         if(f==='线材标准')return '<td>'+((raw)?'<span class="std-tag '+getStdClass(row[f])+'">'+esc(raw)+'</span>':'<span class="std-tag std-gray">-</span>')+'</td>';
         if(f==='SAP料号')return '<td '+cls+'><span class="sap-copy" onclick="copySap(this)" title="点击复制">'+val+'</span></td>';
         if(f==='物料描述'||f==='备注')return '<td '+cls+'>'+hl+'</td>';
@@ -784,6 +785,7 @@ function renderAdminRaw(){
     body.innerHTML=rawData.map(row=>'<tr>'+RAW_FIELDS.map(f=>{
         const val=esc(row[f]||'');
         if(f==='物料描述'||f==='备注')return '<td class="col-desc">'+val+'</td>';
+        if(f==='产品型号')return '<td class="col-model">'+val+'</td>';
         return '<td>'+val+'</td>';
     }).join('')+'</tr>').join('');
 }
