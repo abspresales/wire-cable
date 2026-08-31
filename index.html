@@ -199,6 +199,30 @@ tr:hover{background:#f8fafc;}
   div[onclick="openAdminModal"]{bottom:16px;right:16px;}
 }
 
+/* ===== 增强：全局搜索框 ===== */
+.search-bar{background:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.search-bar .search-icon{flex-shrink:0;color:#6b7280;display:flex;align-items:center;}
+.search-bar input{flex:1;min-width:220px;padding:10px 14px;border:1px solid #d9d9d9;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.search-bar input:focus{border-color:#1a56db;box-shadow:0 0 0 2px rgba(26,86,219,.12);}
+.search-bar .search-clear{flex-shrink:0;width:28px;height:28px;border:none;background:#f3f4f6;color:#6b7280;border-radius:50%;cursor:pointer;font-size:14px;display:none;align-items:center;justify-content:center;transition:all .15s;}
+.search-bar .search-clear.show{display:inline-flex;}
+.search-bar .search-clear:hover{background:#e5e7eb;}
+.search-bar .search-tip{font-size:12px;color:#9ca3af;white-space:nowrap;}
+/* ===== 增强：已选条件标签 ===== */
+.active-filters{background:#fff;padding:10px 24px;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,0.05);margin-bottom:12px;display:none;align-items:center;gap:8px;flex-wrap:wrap;}
+.active-filters.show{display:flex;}
+.active-filters .af-lab{font-size:12px;color:#6b7280;font-weight:600;margin-right:2px;}
+.filter-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:16px;background:#eff6ff;color:#1a56db;font-size:12px;font-weight:600;border:1px solid #d3e3fa;}
+.filter-chip .chip-x{cursor:pointer;width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#dbeafe;color:#1a56db;font-size:12px;line-height:1;transition:all .15s;}
+.filter-chip .chip-x:hover{background:#1a56db;color:#fff;}
+.af-clear-all{font-size:12px;color:#dc3545;cursor:pointer;margin-left:auto;white-space:nowrap;padding:3px 10px;border-radius:14px;transition:all .15s;}
+.af-clear-all:hover{background:#fcebeb;}
+/* ===== 增强：冻结列 + 表头吸顶 ===== */
+.q-table-scroll{overflow-x:auto;}
+#qTable th,#qTable td{position:sticky;}
+#qTable thead th{top:0;z-index:30;background:#f0f7ff;color:#1e3a5f;}
+/* ===== 增强：命中高亮 ===== */
+mark.qmark{background:#fef3c7;color:#92400e;padding:0 2px;border-radius:2px;font-weight:600;}
 </style>
 </head>
 <body>
@@ -214,6 +238,12 @@ tr:hover{background:#f8fafc;}
 <!-- 线材速查页 -->
 <div id="pageQuery" class="page active">
     <div id="qMain" class="sub-page active">
+        <div class="search-bar">
+            <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+            <input type="text" id="qGlobalSearch" placeholder="全局搜索：型号 / SAP料号 / 物料描述 / 备注（支持空格分词，如：A25 连箱 网线）" autocomplete="off">
+            <button class="search-clear" id="qSearchClear" onclick="clearGlobalSearch()" title="清除搜索">✕</button>
+            <span class="search-tip" id="qSearchTip"></span>
+        </div>
         <div class="filter-bar">
             <div class="filter-item"><label>产品系列</label><div class="combobox" id="cb-qSeries" data-default="全部系列"><input type="text" class="combobox-input" value="全部系列" autocomplete="off"><span class="combobox-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span><div class="combobox-list"></div></div></div>
             <div class="filter-item"><label>线材类型</label><div class="combobox" id="cb-qType" data-default="全部类型"><input type="text" class="combobox-input" value="全部类型" autocomplete="off"><span class="combobox-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span><div class="combobox-list"></div></div></div>
@@ -223,7 +253,8 @@ tr:hover{background:#f8fafc;}
             <button class="btn btn-export" type="button" onclick="exportExcel()">⬇ 导出Excel</button>
             <span class="count-info" id="qCount"></span>
         </div>
-        <div class="table-wrap">
+        <div class="active-filters" id="activeFilters"><span class="af-lab">已选条件</span></div>
+        <div class="table-wrap q-table-scroll">
             <table id="qTable">
                 <thead><tr id="qHead"></tr></thead>
                 <tbody id="qBody"></tbody>
@@ -282,6 +313,56 @@ const CABLE_TYPES=['连箱电源线','连箱网线','到屏主电源线','到屏
 const RAW_FIELDS=['产品系列','产品型号','箱体尺寸','线材规格','线材类型','线材标准','线材长度','SAP料号','物料描述','备注'];
 const STORAGE_KEY='wire_cable_data_v1';
 let isDirty=false;
+
+// ===== 增强:标准规范化 =====
+// 统一标准命名 → 规范值;去除分隔符/简称歧义
+const STD_ALIASES={
+    '美标_UL':'美标_UL',
+    'UL':'美标_UL',
+    '美标':'美标_UL',
+    'UL&CUL':'UL&CUL',
+    '美标_UL&CUL':'UL&CUL',
+    '欧标_VDE':'欧标_VDE',
+    '欧标':'欧标_VDE',
+    'VDE':'欧标_VDE',
+    '欧标/VDE':'欧标_VDE',
+    '国标_3C':'国标_3C',
+    '国标':'国标_3C',
+    '3C':'国标_3C',
+    '欧标国标_VDE&3C':'欧标国标_VDE&3C',
+    '欧标/国标-VDE':'欧标国标_VDE&3C',
+    '国标/欧标_VDE':'欧标国标_VDE&3C',
+    '欧标/国标_VDE':'欧标国标_VDE&3C',
+    '国标/欧标-VDE':'欧标国标_VDE&3C',
+    '日标-PSE':'日标-PSE',
+    '日标':'日标-PSE',
+    'PSE':'日标-PSE'
+};
+function normalizeStandard(std){
+    if(std===null||std===undefined)return '';
+    const s=String(std).trim();
+    if(!s)return '';
+    // 完全匹配别名
+    if(STD_ALIASES[s])return STD_ALIASES[s];
+    // 含多标准组合(如"欧标+国标"、"VDE&3C")
+    if(/VDE|欧标/.test(s)&&/3C|国标/.test(s))return '欧标国标_VDE&3C';
+    if(/CUL/.test(s))return 'UL&CUL';
+    if(/PSE|日标/.test(s))return '日标-PSE';
+    if(/VDE|欧标/.test(s))return '欧标_VDE';
+    if(/3C|国标/.test(s))return '国标_3C';
+    if(/UL|美标/.test(s))return '美标_UL';
+    return s;
+}
+// 清洗全库:规范化标准 + 空标准标记待补 + 空SAP标记
+function cleanRawData(arr){
+    if(!arr)return [];
+    return arr.map(r=>{
+        const o=Object.assign({},r);
+        o['线材标准']=normalizeStandard(o['线材标准']);
+        // 有物料描述但缺SAP料号/标准 → 标记待补(不改变数据,仅用于界面提示)
+        return o;
+    });
+}
 
 let rawData=[];
 let historyData=[];
@@ -350,6 +431,23 @@ function getComboboxValue(id){const cb=document.getElementById('cb-'+id);return 
 function setComboboxValue(id,value){const cb=document.getElementById('cb-'+id);if(cb)cb.querySelector('.combobox-input').value=value||'';}
 function clearCombobox(id){const cb=document.getElementById('cb-'+id);if(cb){const def=cb.getAttribute('data-default')||'';cb.querySelector('.combobox-input').value=def;}}
 function setComboboxDisabled(id,disabled){const cb=document.getElementById('cb-'+id);if(!cb)return;cb.classList.toggle('disabled',disabled);cb.querySelector('.combobox-input').disabled=disabled;if(disabled)cb.classList.remove('open');}
+function getGlobalKeyword(){
+    const el=document.getElementById('qGlobalSearch');
+    return el?el.value.trim():'';
+}
+// 解析搜索词为分词数组(AND)
+function getGlobalKeywords(){
+    const kw=getGlobalKeyword();
+    if(!kw)return [];
+    return kw.split(/[\s,，、]+/).map(x=>x.trim()).filter(Boolean);
+}
+// 判断一行是否命中所有关键词
+function rowMatchesKeyword(row,keywords){
+    if(!keywords.length)return true;
+    const fields=['产品型号','SAP料号','物料描述','备注','线材规格','产品系列','线材标准','线材长度'];
+    const text=fields.map(f=>String(row[f]||'')).join(' ').toLowerCase();
+    return keywords.every(k=>text.includes(k.toLowerCase()));
+}
 function getQueryFiltered(){
     let result=rawData;
     const s=getComboboxValue('qSeries');
@@ -360,13 +458,28 @@ function getQueryFiltered(){
     if(t&&t!=='全部类型')result=result.filter(r=>(r['线材类型']||'').includes(t));
     if(l&&l!=='全部长度')result=result.filter(r=>(r['线材长度']||'').includes(l));
     if(st&&st!=='全部标准')result=result.filter(r=>(r['线材标准']||'').includes(st));
+    // 全局关键词(AND)
+    const keywords=getGlobalKeywords();
+    if(keywords.length)result=result.filter(r=>rowMatchesKeyword(r,keywords));
     return result;
+}
+// 把关键词在文本片段中高亮
+function highlightWord(text,keywords){
+    if(!keywords.length)return text;
+    let t=String(text||'');
+    keywords.forEach(k=>{
+        if(!k)return;
+        const re=new RegExp('('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+        t=t.replace(re,'<mark class="qmark">$1</mark>');
+    });
+    return t;
 }
 function onQueryFilter(){
     const type=getComboboxValue('qType');
     if(type.includes('到屏')){setComboboxDisabled('qLength',false);}
     else{setComboboxDisabled('qLength',true);clearCombobox('qLength');}
     currentPage=1;
+    renderActiveFilters();
     renderQueryTable();
 }
 function resetQueryFilter(){
@@ -376,10 +489,71 @@ function resetQueryFilter(){
     clearCombobox('qLength');
     clearCombobox('qStandard');
     currentPage=1;
+    renderActiveFilters();
     renderQueryTable();
 }
+// 清除某个下拉条件
+function removeFilterChip(id){
+    clearCombobox(id);
+    // 长度下拉需联动禁用逻辑
+    if(id==='qLength')setComboboxDisabled('qLength',true);
+    currentPage=1;
+    renderActiveFilters();
+    renderQueryTable();
+}
+// 渲染已选条件胶囊
+function renderActiveFilters(){
+    const cont=document.getElementById('activeFilters');
+    if(!cont)return;
+    // 彻底清空容器，只保留"已选条件"标签文本，避免重复追加
+    cont.innerHTML='';
+    const defs={qSeries:'全部系列',qType:'全部类型',qLength:'全部长度',qStandard:'全部标准'};
+    const labels={qSeries:'系列',qType:'类型',qLength:'长度',qStandard:'标准'};
+    const items=[];
+    const searchKw=getGlobalKeyword();
+    if(searchKw)items.push({key:'_search',label:'搜索:'+searchKw});
+    ['qSeries','qType','qLength','qStandard'].forEach(id=>{
+        const v=getComboboxValue(id);
+        if(v&&v!==defs[id])items.push({key:id,label:labels[id]+':'+v});
+    });
+    if(items.length===0){cont.classList.remove('show');return;}
+    cont.classList.add('show');
+    // 标签文本
+    const lab=document.createElement('span');
+    lab.className='af-lab';
+    lab.textContent='已选条件';
+    cont.appendChild(lab);
+    // 芯片
+    items.forEach(it=>{
+        const chip=document.createElement('div');
+        chip.className='filter-chip';
+        chip.innerHTML='<span>'+esc(it.label)+'</span><span class="chip-x" title="移除" data-key="'+it.key+'">✕</span>';
+        cont.appendChild(chip);
+    });
+    // 单个"清除全部"(仅当有多个条件时显示,避免冗余;单个条件用chip的×即可)
+    if(items.length>1){
+        const clear=document.createElement('span');
+        clear.className='af-clear-all';
+        clear.textContent='全部清除';
+        clear.onclick=function(){onClearAllFilters();};
+        cont.appendChild(clear);
+    }
+    // 绑定× 事件
+    cont.querySelectorAll('.chip-x').forEach(x=>{
+        const key=x.getAttribute('data-key');
+        x.onclick=function(){onRemoveChip(key);};
+    });
+}
+function onRemoveChip(key){
+    if(key==='_search'){clearGlobalSearch();return;}
+    removeFilterChip(key);
+}
+function onClearAllFilters(){
+    resetQueryFilter();
+    clearGlobalSearch(true);
+}
 let currentPage=1;
-const PAGE_SIZE=50;
+const PAGE_SIZE=20;
 function renderQueryTable(){
     const data=getQueryFiltered();
     const type=getComboboxValue('qType');
@@ -387,20 +561,27 @@ function renderQueryTable(){
     if(currentPage>totalPages)currentPage=totalPages;
     if(currentPage<1)currentPage=1;
     document.getElementById('qCount').textContent='共找到 '+data.length+' 条匹配数据';
-    document.getElementById('qHead').innerHTML=RAW_FIELDS.map(f=>'<th>'+esc(f)+'</th>').join('');
+    const keywords=getGlobalKeywords();
+    document.getElementById('qHead').innerHTML=RAW_FIELDS.map((f,i)=>'<th>'+esc(f)+'</th>').join('');
     const body=document.getElementById('qBody');
-    if(data.length===0){body.innerHTML='<tr><td colspan="10" class="no-result">未找到匹配数据</td></tr>';renderPagination(0,1);return;}
+    if(data.length===0){body.innerHTML='<tr><td colspan="10" class="no-result">未找到匹配数据</td></tr>';renderPagination(0,1);renderActiveFilters();return;}
     const start=(currentPage-1)*PAGE_SIZE;
     const pageData=data.slice(start,start+PAGE_SIZE);
-    body.innerHTML=pageData.map(row=>'<tr>'+RAW_FIELDS.map(f=>{
-        const val=esc(row[f]||'');
-        if(f==='线材标准')return '<td>'+(val?'<span class="std-tag '+getStdClass(row[f])+'">'+val+'</span>':'<span class="std-tag std-gray">-</span>')+'</td>';
-        if(f==='SAP料号')return '<td>'+(val?'<span class="sap-copy" onclick="copySap(this)" title="点击复制">'+val+'</span>':'')+'</td>';
-        if(f==='物料描述'||f==='备注')return '<td class="col-desc">'+val+'</td>';
-        return '<td>'+val+'</td>';
+    body.innerHTML=pageData.map(row=>'<tr>'+RAW_FIELDS.map((f,i)=>{
+        const raw=String(row[f]||'');
+        const val=esc(raw);
+        // 命中高亮(针对可扩展描述字段)
+        const hl=(keywords.length&&(f==='物料描述'||f==='备注'||f==='产品型号'||f==='线材规格'))?highlightWord(raw,keywords):val;
+        const cls='class="'+(f==='物料描述'||f==='备注'?'col-desc':'')+'"';
+        if(f==='线材标准')return '<td>'+((raw)?'<span class="std-tag '+getStdClass(row[f])+'">'+esc(raw)+'</span>':'<span class="std-tag std-gray">-</span>')+'</td>';
+        if(f==='SAP料号')return '<td '+cls+'><span class="sap-copy" onclick="copySap(this)" title="点击复制">'+val+'</span></td>';
+        if(f==='物料描述'||f==='备注')return '<td '+cls+'>'+hl+'</td>';
+        return '<td '+cls+'>'+hl+'</td>';
     }).join('')+'</tr>').join('');
     toggleQueryCols(type);
     renderPagination(data.length,totalPages);
+    renderActiveFilters();
+    updateSearchClear();
 }
 function renderPagination(total,totalPages){
     const el=document.getElementById('pagination');
@@ -445,9 +626,9 @@ function exportExcel(){
 function getStdClass(std){
     if(!std)return 'std-gray';
     const s=String(std);
+    if(s.includes('UL&CUL'))return 'std-purple';
     if(s.includes('国标')||s.includes('3C'))return 'std-green';
     if(s.includes('欧标')||s.includes('VDE'))return 'std-blue';
-    if(s.includes('CUL'))return 'std-purple';
     if(s.includes('美标')||s.includes('UL'))return 'std-orange';
     return 'std-gray';
 }
@@ -488,6 +669,41 @@ function renderQueryHistory(){
     // 更新履历已改为浮窗显示，此函数保留为空
 }
 function refreshQueryPage(){initQueryDropdowns();renderQueryTable();}
+
+// ===== 增强:全局搜索框逻辑 =====
+function updateSearchClear(){
+    const el=document.getElementById('qSearchClear');
+    const input=document.getElementById('qGlobalSearch');
+    const tip=document.getElementById('qSearchTip');
+    if(!el||!input)return;
+    const has=input.value.trim().length>0;
+    el.classList.toggle('show',has);
+    if(tip)tip.textContent=has?'':'';
+}
+function clearGlobalSearch(skipRender){
+    const input=document.getElementById('qGlobalSearch');
+    if(input)input.value='';
+    updateSearchClear();
+    currentPage=1;
+    if(!skipRender){renderActiveFilters();renderQueryTable();}
+}
+function bindGlobalSearch(){
+    const input=document.getElementById('qGlobalSearch');
+    if(!input)return;
+    let debounce=null;
+    input.addEventListener('input',()=>{
+        clearTimeout(debounce);
+        debounce=setTimeout(()=>{
+            currentPage=1;
+            updateSearchClear();
+            renderActiveFilters();
+            renderQueryTable();
+        },150);
+    });
+    input.addEventListener('keydown',(e)=>{
+        if(e.key==='Enter'){e.preventDefault();currentPage=1;renderActiveFilters();renderQueryTable();}
+    });
+}
 
 // 后台维护
 function openAdminModal(){
@@ -611,7 +827,7 @@ function handleExcelImport(event){
             if(imported.length===0){alert('未解析到有效物料数据，请检查文件格式（F12控制台查看详情）');return;}
             const msg='确定覆盖当前全部数据？\n物料：'+rawData.length+' → '+imported.length+' 条\n履历：'+historyData.length+' → '+importedHistory.length+' 条';
             if(!confirm(msg))return;
-            rawData=imported;
+            rawData=cleanRawData(imported);
             if(importedHistory.length>0)historyData=importedHistory;
             setDirty();
             // 刷新后台
@@ -733,7 +949,11 @@ function parseHistorySheet(wb){
 // 加载外部数据
 async function loadDataFromJson(){
     try{
-        const resp=await fetch('data.json');
+        // 给 fetch 加超时保护，避免在无 data.json 的环境无限挂起导致兜底无法执行
+        const controller=new AbortController();
+        const timeout=setTimeout(()=>controller.abort(),3000);
+        const resp=await fetch('data.json',{signal:controller.signal});
+        clearTimeout(timeout);
         if(!resp.ok)throw new Error('加载失败');
         const data=await resp.json();
         if(data.rawData&&data.rawData.length>0){
@@ -743,23 +963,35 @@ async function loadDataFromJson(){
             return true;
         }
     }catch(e){
-        console.warn('data.json 加载失败，使用空数据（本地打开时属正常现象，部署到服务器后自动加载）');
+        console.warn('data.json 加载失败，将使用内嵌默认数据：'+(e&&e.message));
     }
     return false;
 }
 
 // 页面加载
 async function initPage(){
+    // 1. 先用内嵌默认数据立即渲染,确保任何环境下页面都有数据(不等网络)
     const hasLocal=autoLoadLocalStorage();
     if(!hasLocal||rawData.length===0){
-        const loaded=await loadDataFromJson();
-        if(!loaded&&typeof DEFAULT_DATA!=='undefined'&&DEFAULT_DATA.rawData&&DEFAULT_DATA.rawData.length>0){
+        if(typeof DEFAULT_DATA!=='undefined'&&DEFAULT_DATA.rawData&&DEFAULT_DATA.rawData.length>0){
             rawData=DEFAULT_DATA.rawData;
             historyData=DEFAULT_DATA.historyData||[];
             console.log('已加载内嵌默认数据：'+rawData.length+'条');
         }
     }
+    rawData=cleanRawData(rawData);
+    bindGlobalSearch();
     refreshQueryPage();
+    renderActiveFilters();
+    // 2. 再异步尝试用外部 data.json 覆盖(成功才替换,失败静默用默认数据)
+    loadDataFromJson().then(ok=>{
+        if(ok){
+            rawData=cleanRawData(rawData);
+            refreshQueryPage();
+            renderActiveFilters();
+            console.log('已切换到 data.json 数据：'+rawData.length+' 条');
+        }
+    }).catch(()=>{});
 }
 document.addEventListener('DOMContentLoaded',initPage);
 if(document.readyState!=='loading'){initPage();}
