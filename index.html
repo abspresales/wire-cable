@@ -287,7 +287,7 @@ mark.qmark{background:#fef3c7;color:#92400e;padding:0 2px;border-radius:2px;font
             <button class="btn btn-primary" onclick="document.getElementById('excelFileInput').click()">📥 导入Excel覆盖更新</button>
             <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleExcelImport(event)">
             <button class="btn btn-green" onclick="saveToLocal()">💾 保存到浏览器</button>
-            <button class="btn" onclick="exportDataJson()" style="background:#fa8c16;color:#fff;">📤 导出JSON数据</button>
+            <button class="btn" onclick="exportDataJson()" style="background:#fa8c16;color:#fff;">📤 导出并发布</button>
             <span id="dirtyIndicator" class="clean-indicator">✓ 已保存</span>
             <div class="admin-stats">物料<span id="statRaw">0</span>条 | 履历<span id="statHistory">0</span>条 | 系列<span id="statSeries">0</span>个</div>
             <button onclick="adminLogout()" style="margin-left:auto;background:transparent;color:#dc3545;border:1px solid #f5c6cb;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">退出登录</button>
@@ -776,11 +776,17 @@ function saveToLocal(){
     }catch(e){alert('保存失败：'+e.message);}
 }
 
-// 导出JSON数据
+// 导出JSON数据（并引导一键发布）
 function exportDataJson(){
+    // 若存在未保存修改，先提醒，避免导出一份旧数据
+    if(typeof isDirty!=='undefined'&&isDirty){
+        const ok=confirm('检测到有<未保存到浏览器>的修改。\n\n直接导出可能遗漏最新改动。\n建议先点「💾 保存到浏览器」再导出。\n\n仍要继续导出吗？');
+        if(!ok)return;
+    }
     try{
-        const data={rawData:rawData,historyData:historyData};
-        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const data={rawData:cleanRawData(rawData),historyData:historyData};
+        const json=JSON.stringify(data,null,2);
+        const blob=new Blob([json],{type:'application/json'});
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a');
         a.href=url;
@@ -789,6 +795,7 @@ function exportDataJson(){
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        alert('✅ 已生成并下载 data.json\n\n当前数据：'+data.rawData.length+' 条物料\n\n👉 下一步：\n1. 把刚下载的 data.json 放进\n   wire-cable-发布工具\\download 文件夹\n2. 双击「发布.bat」即可自动上传到 GitHub\n\n（发布工具文件夹在你电脑上，之前已准备好）');
     }catch(e){alert('导出失败：'+e.message);}
 }
 
