@@ -295,7 +295,7 @@ mark.qmark{background:#fef3c7;color:#92400e;padding:0 2px;border-radius:2px;font
             <button class="btn btn-primary" onclick="document.getElementById('excelFileInput').click()">📥 导入Excel覆盖更新</button>
             <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleExcelImport(event)">
             <button class="btn btn-green" onclick="saveToLocal()">💾 保存到浏览器</button>
-            <button class="btn" onclick="exportDataJson()" style="background:#fa8c16;color:#fff;">📤 导出并发布</button>
+            <button class="btn" onclick="exportDataJson()" style="background:#fa8c16;color:#fff;">📤 一键发布</button>
             <span id="dirtyIndicator" class="clean-indicator">✓ 已保存</span>
             <div class="admin-stats">物料<span id="statRaw">0</span>条 | 履历<span id="statHistory">0</span>条 | 系列<span id="statSeries">0</span>个</div>
             <button onclick="adminLogout()" style="margin-left:auto;background:transparent;color:#dc3545;border:1px solid #f5c6cb;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">退出登录</button>
@@ -808,14 +808,13 @@ function saveToLocal(){
     }catch(e){alert('保存失败：'+e.message);}
 }
 
-// 导出JSON数据（并引导一键发布）
+// 一键发布：自动保存到浏览器 + 生成 cable.json 触发托盘自动推送 GitHub（无需再手动保存）
 function exportDataJson(){
-    // 若存在未保存修改，先提醒，避免导出一份旧数据
-    if(typeof isDirty!=='undefined'&&isDirty){
-        const ok=confirm('检测到有<未保存到浏览器>的修改。\n\n直接导出可能遗漏最新改动。\n建议先点「💾 保存到浏览器」再导出。\n\n仍要继续导出吗？');
-        if(!ok)return;
-    }
     try{
+        // ① 自动先把最新数据保存到浏览器（防止 dirty 提示/数据丢失），并清掉"未保存"标记
+        localStorage.setItem(STORAGE_KEY,JSON.stringify({rawData:rawData,historyData:historyData}));
+        clearDirty();
+        // ② 生成 cable.json 并下载到「下载」文件夹 → 托盘监控检测到后自动推送到 GitHub 上线
         const data={rawData:cleanRawData(rawData),historyData:historyData};
         const json=JSON.stringify(data,null,2);
         const blob=new Blob([json],{type:'application/json'});
@@ -827,8 +826,8 @@ function exportDataJson(){
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        alert('✅ 已生成并下载 cable.json\n\n当前数据：'+data.rawData.length+' 条物料\n\n👉 自动发布中：\n文件会落入电脑的「下载」文件夹，\n托盘监控检测到后会自动推送到 GitHub 上线。');
-    }catch(e){alert('导出失败：'+e.message);}
+        alert('✅ 已一键发布\n\n当前数据：'+data.rawData.length+' 条物料\n\n已自动保存到浏览器，并生成 cable.json 触发托盘推送。\n📤 托盘监控检测到后会自动提交到 GitHub 上线（约 1~2 分钟生效）。');
+    }catch(e){alert('发布失败：'+e.message);}
 }
 
 // 自动加载本地数据
@@ -881,7 +880,7 @@ function handleExcelImport(event){
             clearCombobox('qStandard');
             // 刷新速查页
             initQueryDropdowns();renderQueryTable();
-            alert('导入成功！\n物料：'+imported.length+'条\n履历：'+historyData.length+'条\n筛选已重置为全部，请切换到线材速查页查看。\n请点击💾保存按钮备份。');
+            alert('导入成功！\n物料：'+imported.length+'条\n履历：'+historyData.length+'条\n筛选已重置为全部，请切换到线材速查页查看。\n👉 点击「📤 一键发布」即可自动保存并推送上线。');
         }catch(err){console.error(err);alert('Excel解析失败：'+err.message+'\n请按F12查看控制台错误详情');}
     };
     reader.readAsArrayBuffer(file);
