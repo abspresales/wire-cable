@@ -891,7 +891,7 @@ function parseExcelWorkbook(wb){
     const allRows=[];
     wb.SheetNames.forEach(sheetName=>{
         try{
-        if(sheetName==='履历'||sheetName==='修订履历')return;
+        if(String(sheetName).includes('履历'))return;   // 跳过履历类sheet(履历/修订履历/更新履历)
         const ws=wb.Sheets[sheetName];
         if(!ws)return;
         const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
@@ -962,9 +962,9 @@ function parseExcelWorkbook(wb){
 function parseHistorySheet(wb){
     const history=[];
     let historySheet=null;
-    // 查找履历sheet
+    // 查找履历sheet（兼容“履历/修订履历/更新履历”等含“履历”的命名）
     for(const name of wb.SheetNames){
-        if(name==='履历'||name==='修订履历'){historySheet=name;break;}
+        if(String(name).includes('履历')){historySheet=name;break;}
     }
     if(!historySheet){console.log('未找到履历sheet');return history;}
     const ws=wb.Sheets[historySheet];
