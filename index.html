@@ -141,9 +141,9 @@ tr:hover{background:#f8fafc;}
 .combobox-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;transition:transform 0.2s;display:flex;align-items:center;justify-content:center;width:16px;height:16px;}
 .combobox-arrow svg{width:14px;height:14px;display:block;}
 .combobox.open .combobox-arrow{transform:translateY(-50%) rotate(180deg);}
-.combobox-list{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:280px;overflow-y:auto;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.15);z-index:100;display:none;padding:4px 0;}
+.combobox-list{position:absolute;top:calc(100% + 4px);left:0;right:0;width:auto;min-width:100%;max-width:min(520px, calc(100vw - 32px));max-height:min(340px, 60vh);overflow-y:auto;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.15);z-index:100;display:none;padding:4px 0;}
 .combobox.open .combobox-list{display:block;}
-.combobox-item{padding:8px 14px;font-size:13px;color:#374151;cursor:pointer;transition:background 0.12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.combobox-item{padding:8px 14px;font-size:13px;color:#374151;cursor:pointer;transition:background 0.12s;white-space:nowrap;}
 .combobox-item:hover{background:#eff6ff;color:#1a56db;}
 .combobox-item.selected{background:#dbeafe;color:#1a56db;font-weight:600;}
 .combobox-item.highlight{background:#eff6ff;}
@@ -186,6 +186,8 @@ tr:hover{background:#f8fafc;}
   .filter-bar{padding:14px 16px;gap:10px 12px;align-items:stretch;flex-wrap:wrap;overflow-x:visible;}
   .filter-item{flex:1 1 calc(50% - 6px);min-width:0;flex-direction:column;align-items:stretch;gap:4px;}
   .filter-item label{font-size:13px;margin-right:0;margin-bottom:2px;}
+  .combobox-list{width:100%;min-width:0;max-width:none;max-height:260px;}
+  .combobox-item{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .filter-item select,.filter-item input{width:100%;min-width:0;padding:10px 12px;font-size:14px;min-height:40px;}
   .btn-reset{flex:1 1 100%;justify-content:center;padding:12px 16px;min-height:44px;font-size:14px;order:10;}
   .btn-export{flex:1 1 100%;justify-content:center;padding:12px 16px;min-height:44px;font-size:14px;order:10;}
@@ -421,7 +423,37 @@ function initCombobox(id, options){
         cb.classList.add('open');
         renderList(input.value);
         list.scrollTop=0;
+        fitListWidth();
     }
+    function fitListWidth(){
+        // 动态撑开列表宽度：至少等于输入框宽，且能完整容纳最宽选项文本
+        requestAnimationFrame(function(){
+            if(isMobile()){ // 移动端保持与输入框等宽
+                list.style.width='100%';list.style.maxWidth='none';
+                list.style.left='0';list.style.right='0';return;
+            }
+            const inputW=input.getBoundingClientRect().width;
+            // 用 canvas 精确测量最宽选项文本的像素宽度（13px 字体 + 左右 padding 14px）
+            const canvas=document.createElement('canvas');
+            const ctx=canvas.getContext('2d');
+            ctx.font=window.getComputedStyle(list.querySelector('.combobox-item')||list).fontWeight+' 13px '+getComputedStyle(document.body).fontFamily;
+            const ITEM_PADDING=14*2; // 左右各 14px
+            let widest=inputW;
+            Array.from(list.querySelectorAll('.combobox-item')).forEach(function(it){
+                const w=ctx.measureText(it.textContent||'').width+ITEM_PADDING;
+                if(w>widest)widest=w;
+            });
+            // 含容器自身 padding 富余，再加一点余量
+            widest=Math.min(Math.ceil(widest)+2, 520);
+            list.style.width=widest+'px';list.style.maxWidth='';list.style.left='';list.style.right='';
+            // 防止超出视口右边缘
+            const r=list.getBoundingClientRect();
+            const vw=window.innerWidth||document.documentElement.clientWidth;
+            if(r.right>vw-8){list.style.left='auto';list.style.right='0';}
+            else{list.style.left='0';list.style.right='auto';}
+        });
+    }
+    function isMobile(){return window.innerWidth<=640;}
     function close(){cb.classList.remove('open');}
     function select(value){input.value=value;close();if(typeof onQueryFilter==='function')onQueryFilter();}
     input.addEventListener('focus',open);
