@@ -33,7 +33,7 @@ th{background:#fff;color:#111827;padding:12px 14px;text-align:center;font-weight
 td{padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;vertical-align:middle;white-space:nowrap;overflow:hidden;font-size:13px;}
 tr:hover{background:#f8fafc;}
 .col-desc{text-align:left;white-space:normal;line-height:1.6;min-width:200px;color:#333;}
-.col-model{text-align:center;white-space:pre-line;line-height:1.5;min-width:170px;color:#333;}
+.col-model{text-align:center;white-space:normal;line-height:1.5;min-width:170px;color:#333;}
 .no-result{text-align:center;padding:40px;color:#4b5563;font-size:13px;}
 .btn{padding:9px 20px;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:500;transition:all 0.18s;}
 .btn-primary{background:#1a56db;color:#fff;}
@@ -611,32 +611,8 @@ function renderQueryTable(){
     if(data.length===0){body.innerHTML='<tr><td colspan="10" class="no-result">未找到匹配数据</td></tr>';renderPagination(0,1);renderActiveFilters();return;}
     const start=(currentPage-1)*PAGE_SIZE;
     const pageData=data.slice(start,start+PAGE_SIZE);
-    // 构建「产品系列 → 该系列连箱线产品型号」映射(供到屏主电源线/网线等型号为空的记录引用型号)
-    const seriesModelMap={};
-    rawData.forEach(r=>{
-        const s=String(r['产品系列']||'').trim();
-        const t=String(r['线材类型']||'').trim();
-        const m=String(r['产品型号']||'').trim();
-        if(!s||!m)return;
-        if(t.indexOf('连箱')<0)return;
-        if(!seriesModelMap[s])seriesModelMap[s]=[];
-        if(seriesModelMap[s].indexOf(m)<0)seriesModelMap[s].push(m);
-    });
     body.innerHTML=pageData.map(row=>'<tr>'+RAW_FIELDS.map((f,i)=>{
         let raw=String(row[f]||'');
-        // 产品型号为空时(到屏主电源线/网线等)，引用同系列连箱线的产品型号作为型号明细带出来
-        if(f==='产品型号'&&!raw.trim()){
-            const s=String(row['产品系列']||'').trim();
-            const models=seriesModelMap[s]||[];
-            if(models.length){
-                raw=models.join('\n');
-            }else{
-                // 该系列无连箱型号可引用时，退化为线材规格(+长度)
-                const spec=String(row['线材规格']||'').trim();
-                const len=String(row['线材长度']||'').trim();
-                raw=(spec?spec:'—')+(len?' '+len:'');
-            }
-        }
         const val=esc(raw);
         // 命中高亮(针对可扩展描述字段)
         const hl=(keywords.length&&(f==='物料描述'||f==='备注'||f==='产品型号'||f==='线材规格'))?highlightWord(raw,keywords):val;
