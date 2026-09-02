@@ -808,25 +808,25 @@ function saveToLocal(){
     }catch(e){alert('保存失败：'+e.message);}
 }
 
-// 导出数据：保存到浏览器 + 下载 data.json，手动上传到 GitHub（不再自动推送）
+// 导出数据：保存到浏览器 + 下载 wire-cable.json，手动上传到 GitHub（不再自动推送）
 function exportDataJson(){
     try{
         // ① 自动先把最新数据保存到浏览器（防止 dirty 提示/数据丢失），并清掉"未保存"标记
         localStorage.setItem(STORAGE_KEY,JSON.stringify({rawData:rawData,historyData:historyData}));
         clearDirty();
-        // ② 生成 data.json 并下载（手动上传到 GitHub 用）
+        // ② 生成 wire-cable.json 并下载（手动上传到 GitHub 用）
         const data={rawData:cleanRawData(rawData),historyData:historyData};
         const json=JSON.stringify(data,null,2);
         const blob=new Blob([json],{type:'application/json'});
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a');
         a.href=url;
-        a.download='data.json';
+        a.download='wire-cable.json';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        alert('✅ 已导出 data.json（'+data.rawData.length+' 条物料）\n\n请把下载的 data.json 上传到 GitHub 仓库（替换根目录的 data.json），线上页面即会更新。');
+        alert('✅ 已导出 wire-cable.json（'+data.rawData.length+' 条物料）\n\n请把下载的 wire-cable.json 上传到 GitHub 仓库（替换根目录的 wire-cable.json），线上页面即会更新。');
     }catch(e){alert('导出失败：'+e.message);}
 }
 
@@ -880,7 +880,7 @@ function handleExcelImport(event){
             clearCombobox('qStandard');
             // 刷新速查页
             initQueryDropdowns();renderQueryTable();
-            alert('导入成功！\n物料：'+imported.length+'条\n履历：'+historyData.length+'条\n筛选已重置为全部，请切换到线材速查页查看。\n👉 点击「📤 导出JSON」下载 data.json，再手动上传到 GitHub 即可更新线上。');
+            alert('导入成功！\n物料：'+imported.length+'条\n履历：'+historyData.length+'条\n筛选已重置为全部，请切换到线材速查页查看。\n👉 点击「📤 导出JSON」下载 wire-cable.json，再手动上传到 GitHub 即可更新线上。');
         }catch(err){console.error(err);alert('Excel解析失败：'+err.message+'\n请按F12查看控制台错误详情');}
     };
     reader.readAsArrayBuffer(file);
@@ -987,21 +987,21 @@ function parseHistorySheet(wb){
 // 加载外部数据
 async function loadDataFromJson(){
     try{
-        // 给 fetch 加超时保护，避免在无 data.json 的环境无限挂起导致兜底无法执行
+        // 给 fetch 加超时保护，避免在无 wire-cable.json 的环境无限挂起导致兜底无法执行
         const controller=new AbortController();
         const timeout=setTimeout(()=>controller.abort(),3000);
-        const resp=await fetch('data.json',{signal:controller.signal});
+        const resp=await fetch('wire-cable.json',{signal:controller.signal});
         clearTimeout(timeout);
         if(!resp.ok)throw new Error('加载失败');
         const data=await resp.json();
         if(data.rawData&&data.rawData.length>0){
             rawData=data.rawData;
             historyData=data.historyData||[];
-            console.log('已从 data.json 加载数据：'+rawData.length+' 条');
+            console.log('已从 wire-cable.json 加载数据：'+rawData.length+' 条');
             return true;
         }
     }catch(e){
-        console.warn('data.json 加载失败，将使用内嵌默认数据：'+(e&&e.message));
+        console.warn('wire-cable.json 加载失败，将使用内嵌默认数据：'+(e&&e.message));
     }
     return false;
 }
@@ -1021,13 +1021,13 @@ async function initPage(){
     bindGlobalSearch();
     refreshQueryPage();
     renderActiveFilters();
-    // 2. 再异步尝试用外部 data.json 覆盖(成功才替换,失败静默用默认数据)
+    // 2. 再异步尝试用外部 wire-cable.json 覆盖(成功才替换,失败静默用默认数据)
     loadDataFromJson().then(ok=>{
         if(ok){
             rawData=cleanRawData(rawData);
             refreshQueryPage();
             renderActiveFilters();
-            console.log('已切换到 data.json 数据：'+rawData.length+' 条');
+            console.log('已切换到 wire-cable.json 数据：'+rawData.length+' 条');
         }
     }).catch(()=>{});
 }
