@@ -612,7 +612,13 @@ function renderQueryTable(){
     const start=(currentPage-1)*PAGE_SIZE;
     const pageData=data.slice(start,start+PAGE_SIZE);
     body.innerHTML=pageData.map(row=>'<tr>'+RAW_FIELDS.map((f,i)=>{
-        const raw=String(row[f]||'');
+        let raw=String(row[f]||'');
+        // 产品型号为空时(到屏主电源线/网线等)，用线材规格(+长度)作为型号明细带出来
+        if(f==='产品型号'&&!raw.trim()){
+            const spec=String(row['线材规格']||'').trim();
+            const len=String(row['线材长度']||'').trim();
+            raw=(spec?spec:'—')+(len?' '+len:'');
+        }
         const val=esc(raw);
         // 命中高亮(针对可扩展描述字段)
         const hl=(keywords.length&&(f==='物料描述'||f==='备注'||f==='产品型号'||f==='线材规格'))?highlightWord(raw,keywords):val;
