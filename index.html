@@ -1080,6 +1080,25 @@ function closeHistoryModal() {
   document.body.style.overflow = '';
 }
 
+// 统一格式化履历日期为 YYYY-MM-DD(兼容多种输入格式)
+function fmtDate(s){
+  s = String(s == null ? '' : s).trim();
+  if (!s) return '';
+  const datePart = s.split(' ')[0]; // 去掉时间部分
+  const pad2 = n => String(n).padStart(2, '0');
+  // 1) 年/月/日(首段4位): 2025-12-26 / 2025/12/26 / 2026/9/2 / 2025-02-14
+  let m = datePart.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+  if (m) return m[1] + '-' + pad2(m[2]) + '-' + pad2(m[3]);
+  // 2) 月/日/年(末段2位或4位, 首段非4位): 2/14/25 / 12/5/25 / 2/14/2025
+  m = datePart.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2}|\d{4})$/);
+  if (m) {
+    let y = m[3];
+    if (y.length === 2) y = '20' + y;
+    return y + '-' + pad2(m[1]) + '-' + pad2(m[2]);
+  }
+  return s; // 无法识别则原样返回
+}
+
 function renderHistoryModal() {
   const body = document.getElementById('historyTableBody');
   // 跳过表头行
@@ -1092,7 +1111,7 @@ function renderHistoryModal() {
   }
   let lastDate = '';
   body.innerHTML = data.map(h => {
-    const fullDate = (h['日期'] || '').substring(0, 10);
+    const fullDate = fmtDate(h['日期']);
     const showDate = fullDate !== lastDate ? fullDate : '';
     lastDate = fullDate;
     return '<tr><td>' + esc(showDate) + '</td><td class="col-content">' + esc(h['修订内容'] || '') + '</td><td>' + esc(h['编辑人'] || '') + '</td></tr>';
