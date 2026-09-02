@@ -34,7 +34,7 @@ td{padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;vertical-
 tr:hover{background:#f8fafc;}
 .col-desc{text-align:left;white-space:normal;line-height:1.6;min-width:200px;color:#333;}
 .col-model{text-align:center;white-space:normal;line-height:1.5;min-width:170px;color:#333;}
-.no-result{text-align:center;padding:40px;color:#999;font-size:13px;}
+.no-result{text-align:center;padding:40px;color:#4b5563;font-size:13px;}
 .btn{padding:9px 20px;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:500;transition:all 0.18s;}
 .btn-primary{background:#1a56db;color:#fff;}
 .btn-primary:hover{background:#1548b8;}
@@ -147,16 +147,16 @@ tr:hover{background:#f8fafc;}
 .combobox-item:hover{background:#eff6ff;color:#1a56db;}
 .combobox-item.selected{background:#dbeafe;color:#1a56db;font-weight:600;}
 .combobox-item.highlight{background:#eff6ff;}
-.combobox-empty{padding:12px 14px;font-size:13px;color:#9ca3af;text-align:center;}
+.combobox-empty{padding:12px 14px;font-size:13px;color:#4b5563;text-align:center;}
 .combobox.disabled .combobox-input{background:#f0f0f0;color:#999;cursor:not-allowed;}
 .combobox.disabled .combobox-arrow{color:#ccc;}
 /* ===== 线材标准彩色标签 ===== */
 .std-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:600;white-space:nowrap;}
-.std-orange{background:#fff4e5;color:#d97706;}
-.std-blue{background:#eff6ff;color:#1a56db;}
-.std-green{background:#ecfdf5;color:#059669;}
-.std-purple{background:#f5f3ff;color:#7c3aed;}
-.std-gray{background:#f3f4f6;color:#6b7280;}
+.std-orange{background:#fff7ed;color:#b45309;font-weight:600;}
+.std-blue{background:#eff6ff;color:#1d4ed8;font-weight:600;}
+.std-green{background:#ecfdf5;color:#047857;font-weight:600;}
+.std-purple{background:#f5f3ff;color:#6d28d9;font-weight:600;}
+.std-gray{background:#f3f4f6;color:#4b5563;font-weight:600;}
 /* ===== SAP料号复制 ===== */
 .sap-copy{font-family:Consolas,Monaco,"Courier New",monospace;cursor:pointer;padding:3px 8px;border-radius:5px;transition:all 0.15s;display:inline-block;font-size:13px;}
 .sap-copy:hover{background:#dbeafe;color:#1a56db;}
@@ -215,7 +215,7 @@ tr:hover{background:#f8fafc;}
 .search-bar .search-clear{flex-shrink:0;width:28px;height:28px;border:none;background:#f3f4f6;color:#6b7280;border-radius:50%;cursor:pointer;font-size:14px;display:none;align-items:center;justify-content:center;transition:all .15s;}
 .search-bar .search-clear.show{display:inline-flex;}
 .search-bar .search-clear:hover{background:#e5e7eb;}
-.search-bar .search-tip{font-size:12px;color:#9ca3af;white-space:nowrap;}
+.search-bar .search-tip{font-size:12px;color:#6b7280;white-space:nowrap;}
 /* ===== 增强：已选条件标签 ===== */
 .active-filters{background:#fff;padding:10px 24px;border-radius:10px;box-shadow:0 1px 4px rgba(16,42,80,0.05);margin-bottom:14px;display:none;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid #eef2f7;}
 .active-filters.show{display:flex;}
@@ -242,7 +242,7 @@ mark.qmark{background:#fef3c7;color:#92400e;padding:0 2px;border-radius:2px;font
 <div style="background:linear-gradient(135deg,#1a3a5c 0%,#2d5f8a 100%);padding:18px 24px;color:#fff;">
     <h1 style="font-size:24px;font-weight:700;margin:0 0 6px 0;">标准线材速查表</h1>
     <p style="font-size:13px;margin:0 0 4px 0;opacity:0.85;">LED 显示屏标准线材快速查询工具</p>
-    <p style="font-size:13px;margin:0;opacity:0.7;">支持产品系列、线材类型、线材长度、线材标准多维度筛选，全局搜索即可快速定位所需线材。</p>
+    <p style="font-size:13px;margin:0;opacity:0.92;">支持产品系列、线材类型、线材长度、线材标准多维度筛选，全局搜索即可快速定位所需线材。</p>
 </div>
 
 <!-- 线材速查页 -->
@@ -310,7 +310,7 @@ mark.qmark{background:#fef3c7;color:#92400e;padding:0 2px;border-radius:2px;font
         </div>
         <div style="position:sticky;bottom:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 20px;background:#fff;border-top:1px solid #e5e7eb;z-index:10;">
             <button onclick="scrollAdminTable(-200)" style="width:36px;height:36px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#6b7280;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">‹</button>
-            <span style="font-size:13px;color:#9ca3af;">左右滑动查看更多列</span>
+            <span style="font-size:13px;color:#4b5563;">左右滑动查看更多列</span>
             <button onclick="scrollAdminTable(200)" style="width:36px;height:36px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#6b7280;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">›</button>
         </div>
     </div>
