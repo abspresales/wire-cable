@@ -85,7 +85,7 @@ tr:hover{background:#f8fafc;}
 /* ===== 后台维护浮窗 ===== */
 .admin-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:998;opacity:0;visibility:hidden;transition:all 0.3s ease;}
 .admin-modal-overlay.active{opacity:1;visibility:visible;}
-.admin-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.96);width:min(520px,92vw);height:min(420px,75vh);background:#f0f2f5;border-radius:12px;z-index:999;opacity:0;visibility:hidden;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.admin-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.96);width:min(680px,92vw);height:min(560px,75vh);background:#f0f2f5;border-radius:12px;z-index:999;opacity:0;visibility:hidden;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
 .admin-modal.active{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1);}
 .admin-modal-header{flex-shrink:0;padding:14px 24px;background:#fff;color:#111827;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;}
 .admin-modal-close{width:32px;height:32px;border-radius:6px;border:none;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
@@ -521,10 +521,10 @@ mark.qmark{background:linear-gradient(180deg,transparent 60%,#FCE0B0 60%);color:
 }
 .modal-header h3,.admin-modal-header>span{color:#1E3A5F!important;font-weight:700;letter-spacing:.5px;}
 .modal-header .modal-count{background:var(--cream-100)!important;color:var(--orange-600)!important;font-weight:700;}
-.modal-close,.admin-modal-close{background:rgba(255,255,255,.15);color:#fff;border-radius:8px;transition:all .18s var(--e-sm);}
-.modal-close:hover,.admin-modal-close:hover{background:var(--orange-500);color:#fff;transform:rotate(90deg);}
-.admin-modal-size{background:rgba(255,255,255,.15);color:#fff;border-radius:8px;transition:all .18s var(--e-sm);}
-.admin-modal-size:hover{background:var(--orange-500);color:#fff;transform:scale(1.08);}
+.modal-close,.admin-modal-close{background:#EAF1F8;color:#1E3A5F;border:1px solid #C9D8EA;border-radius:8px;transition:all .18s var(--e-sm);}
+.modal-close:hover,.admin-modal-close:hover{background:var(--orange-500);color:#fff;border-color:var(--orange-500);transform:rotate(90deg);}
+.admin-modal-size{background:#EAF1F8;color:#1E3A5F;border:1px solid #C9D8EA;border-radius:8px;transition:all .18s var(--e-sm);}
+.admin-modal-size:hover{background:var(--orange-500);color:#fff;border-color:var(--orange-500);transform:scale(1.08);}
 .modal-search input{border-radius:8px;transition:border-color .2s,box-shadow .2s;border-color:#D7E0EC;}
 .modal-search input:focus{box-shadow:var(--ring);border-color:var(--orange-500);}
 
@@ -679,10 +679,10 @@ h1,h2,h3,h4,strong,b{font-weight:700;color:#2A2F38;}
             <button class="btn btn-primary" onclick="document.getElementById('excelFileInput').click()">📥 导入Excel覆盖更新</button>
             <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleExcelImport(event)">
             <button class="btn btn-green" onclick="saveToLocal()">💾 保存到浏览器</button>
-            <button class="btn" onclick="exportDataJson()" style="background:#fa8c16;color:#fff;">📤 导出JSON</button>
+            <button class="btn" onclick="exportDataJson()" style="background:linear-gradient(135deg,#E78131,#D96C1F);color:#fff;box-shadow:0 4px 12px rgba(231,129,49,.30);">📤 导出JSON</button>
             <span id="dirtyIndicator" class="clean-indicator">✓ 已保存</span>
             <div class="admin-stats">物料<span id="statRaw">0</span>条 | 履历<span id="statHistory">0</span>条 | 系列<span id="statSeries">0</span>个</div>
-            <button onclick="adminLogout()" style="margin-left:auto;background:transparent;color:#dc3545;border:1px solid #f5c6cb;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">退出登录</button>
+            <button onclick="adminLogout()" style="margin-left:auto;background:linear-gradient(135deg,#E5484D,#C72A2F);color:#fff;border:none;padding:9px 20px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(199,42,47,.30);">退出登录</button>
         </div>
         <div class="table-wrap" id="adminTableWrap">
             <table>
@@ -1169,13 +1169,23 @@ function closeAdminModal(){
 }
 function shrinkAdminModal(){
     const m=document.getElementById('adminModal');
-    m.style.width='400px';
-    m.style.height='320px';
+    // 恢复默认尺寸（清除全屏时的 inline 样式，回到 CSS 类定义的 680×560）
+    m.style.width='';
+    m.style.height='';
+    m.style.top='';
+    m.style.left='';
+    m.style.transform='';
+    m.style.borderRadius='';
 }
 function expandAdminModal(){
     const m=document.getElementById('adminModal');
-    m.style.width='min(1000px,95vw)';
-    m.style.height='min(700px,85vh)';
+    // 全屏（铺满视口，去圆角、取消居中偏移）
+    m.style.width='100vw';
+    m.style.height='100vh';
+    m.style.top='0';
+    m.style.left='0';
+    m.style.transform='none';
+    m.style.borderRadius='0';
 }
 function scrollAdminTable(delta){
     const wrap=document.getElementById('adminTableWrap');
