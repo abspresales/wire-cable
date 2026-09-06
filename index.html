@@ -785,17 +785,33 @@ function switchSubTab(tab){
 }
 
 // 速查页
+let cbLineCtrl=null,cbSeriesCtrl=null,cbTypeCtrl=null,cbLengthCtrl=null,cbStandardCtrl=null;
+function lineOf(row){return String(row['产品线']||'').trim();}
+function seriesOf(row){return String(row['产品系列']||'').trim();}
+// 根据当前所选产品线，计算系列下拉可选项（选择产品线后只带出该产品线对应的系列）
+function seriesOptionsForLine(){
+    const ln=getComboboxValue('qLine');
+    let rows=rawData;
+    if(ln&&ln!=='全部产品线')rows=rows.filter(r=>lineOf(r)===ln.trim());
+    return ['全部系列',...unique(rows.map(seriesOf).filter(Boolean))];
+}
+function updateSeriesCascade(resetValue){
+    // 依据产品线联动系列下拉
+    if(!cbSeriesCtrl)return;
+    cbSeriesCtrl.setOptions(seriesOptionsForLine());
+    if(resetValue!==false){ /* 保持当前系列值，交给 setOptions 内部判断是否需重置 */ }
+}
 function initQueryDropdowns(){
-    initCombobox('qLine',['全部产品线',...unique(rawData.map(d=>d['产品线']))]);
-    initCombobox('qSeries',['全部系列',...unique(rawData.map(d=>d['产品系列']))]);
-    initCombobox('qType',['全部类型',...CABLE_TYPES]);
-    initCombobox('qLength',['全部长度',...unique(rawData.map(d=>d['线材长度']))]);
-    initCombobox('qStandard',['全部标准',...unique(rawData.map(d=>d['线材标准']))]);
+    cbLineCtrl=initCombobox('qLine',['全部产品线',...unique(rawData.map(lineOf).filter(Boolean))]);
+    cbSeriesCtrl=initCombobox('qSeries',['全部系列',...unique(rawData.map(seriesOf).filter(Boolean))]);
+    cbTypeCtrl=initCombobox('qType',['全部类型',...CABLE_TYPES]);
+    cbLengthCtrl=initCombobox('qLength',['全部长度',...unique(rawData.map(d=>d['线材长度']).filter(Boolean))]);
+    cbStandardCtrl=initCombobox('qStandard',['全部标准',...unique(rawData.map(d=>d['线材标准']).filter(Boolean))]);
 }
 // ===== 自定义可搜索下拉组件 =====
 function initCombobox(id, options){
     const cb=document.getElementById('cb-'+id);
-    if(!cb)return;
+    if(!cb)return null;
     const input=cb.querySelector('.combobox-input');
     const list=cb.querySelector('.combobox-list');
     const def=cb.getAttribute('data-default')||'';
@@ -857,6 +873,16 @@ function initCombobox(id, options){
         else if(e.key==='Escape'){close();}
     });
     list.addEventListener('click',(e)=>{const item=e.target.closest('.combobox-item');if(item)select(item.dataset.value);});
+    return {
+        // 动态重设选项列表；若当前选中值不在新列表中，则重置为默认值
+        setOptions:function(newOptions){
+            if(def&&!newOptions.includes(def)){newOptions=[def,...newOptions];}
+            options=newOptions;
+            if(input.value&&input.value!==def&&!newOptions.includes(input.value)){
+                input.value=def;
+            }
+        }
+    };
 }
 function closeAllCombobox(){document.querySelectorAll('.combobox.open').forEach(cb=>cb.classList.remove('open'));}
 document.addEventListener('click',(e)=>{if(!e.target.closest('.combobox'))closeAllCombobox();});
@@ -910,6 +936,8 @@ function highlightWord(text,keywords){
     return t;
 }
 function onQueryFilter(){
+    // 级联：产品线变化时，联动更新系列下拉（只带出该产品线下对应的系列）
+    updateSeriesCascade();
     const type=getComboboxValue('qType');
     if(type.includes('到屏')){setComboboxDisabled('qLength',false);}
     else{setComboboxDisabled('qLength',true);clearCombobox('qLength');}
@@ -924,6 +952,7 @@ function resetQueryFilter(){
     setComboboxDisabled('qLength',true);
     clearCombobox('qLength');
     clearCombobox('qStandard');
+    updateSeriesCascade(); // 恢复系列全量选项
     currentPage=1;
     renderActiveFilters();
     renderQueryTable();
@@ -931,6 +960,8 @@ function resetQueryFilter(){
 // 清除某个下拉条件
 function removeFilterChip(id){
     clearCombobox(id);
+    // 级联：清除产品线后恢复系列全量选项
+    if(id==='qLine')updateSeriesCascade();
     // 长度下拉需联动禁用逻辑
     if(id==='qLength')setComboboxDisabled('qLength',true);
     currentPage=1;
@@ -1110,7 +1141,8 @@ function toggleQueryCols(type){
     const hideSpec=type.includes('连箱');
     RAW_FIELDS.forEach((f,i)=>{
         let hide=false;
-        if(hideModel&&(f==='产品型号'||f==='箱体尺寸'||f==='线材类型'))hide=true;
+        // 到屏类:隐藏箱体尺寸/线材类型,但保留"产品型号"(明细需带出产品型号)
+        if(hideModel&&(f==='箱体尺寸'||f==='线材类型'))hide=true;
         if(hideSpec&&(f==='线材规格'||f==='线材长度'||f==='线材类型'))hide=true;
         const display=hide?'none':'';
         const th=document.querySelector('#qHead th:nth-child('+(i+1)+')');
