@@ -617,6 +617,64 @@ h1,h2,h3,h4,strong,b{font-weight:700;color:#2A2F38;}
 #qTable td,#qTable th{color:#33373D;}
 #qTable tbody td{color:#33373D;}
 .filter-bar,.table-wrap,.search-bar,.pagination,.active-filters{}
+
+/* ==================================================================
+   🖋️ 字体视觉强化层 v4 · 更美观更显眼的字体排版
+   ─────────────────────────────────────────
+   升级中文字体栈、增强字重层次、强化标题/表头/关键数据、优化行高可读性
+   ================================================================== */
+/* 1) 全局字体栈升级：优先现代浏览器自带字体，中文更圆润清晰 */
+body{
+  font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Source Han Sans SC","Microsoft YaHei","微软雅黑",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important;
+  font-size:13.5px!important;
+  letter-spacing:.1px;
+}
+/* 2) 顶部主标题：更大更醒目，加字距，品牌橙点缀 */
+body>div[style*="linear-gradient"] h1{
+  font-size:25px!important;
+  font-weight:900!important;
+  letter-spacing:2.5px!important;
+  line-height:1.3;
+  text-shadow:0 1px 0 #fff,0 2px 8px rgba(30,58,95,.10)!important;
+}
+body>div[style*="linear-gradient"] p:first-of-type{
+  font-size:13.5px!important;font-weight:800!important;letter-spacing:1px!important;
+}
+body>div[style*="linear-gradient"] p:last-of-type{font-size:13px!important;line-height:1.8!important;color:#3E5A7E!important;}
+/* 3) 表格表头：更清晰的中英文字重与对比度 */
+#qTable thead th{
+  font-size:14px!important;
+  font-weight:800!important;
+  letter-spacing:.8px!important;
+}
+#qTable thead th .th-zh{font-size:14px!important;font-weight:800!important;color:#1E3A5F!important;}
+#qTable thead th .th-en{font-size:11px!important;font-weight:700!important;color:#6B7B92!important;letter-spacing:.6px!important;margin-top:3px!important;}
+/* 4) 表格正文：字色加深、加行高，数据更清晰易读 */
+#qTable tbody td{font-size:13.5px!important;line-height:1.6!important;color:#2A3038!important;}
+#qTable tbody tr:hover>td{color:#13506e!important;}
+/* 5) 关键数据列突出：产品型号/线材规格 用深蓝加粗，一眼抓住重点 */
+#qTable td.col-model{font-weight:700!important;color:#1E3A5F!important;letter-spacing:.2px!important;}
+#qTable tbody td:nth-child(6){font-weight:700!important;color:#B85A18!important;} /* 线材规格：品牌橙加粗 */
+#qTable tbody td:nth-child(5){font-weight:700!important;color:#33415C!important;} /* 线材类型：深蓝加粗 */
+/* 6) 料号：等宽字体更清晰，字色加强 */
+#qTable td .sap-copy{font-size:13px!important;font-weight:700!important;color:#13506e!important;letter-spacing:.3px!important;}
+/* 7) 筛选标签：更大字重更醒目 */
+.filter-item label{font-size:12.5px!important;font-weight:700!important;letter-spacing:.4px!important;color:#1E3A5F!important;}
+/* 8) 下拉/搜索输入：字体更大更清晰 */
+.combobox-input{font-size:13.5px!important;font-weight:600!important;color:#1F2B3A!important;letter-spacing:.2px!important;}
+.combobox-item{font-size:13.5px!important;font-weight:600!important;}
+.search-bar input{font-size:13.5px!important;font-weight:600!important;}
+/* 9) 按钮文字：更饱满醒目 */
+.btn{font-size:13.5px!important;font-weight:700!important;letter-spacing:.6px!important;}
+/* 10) 计数/条件胶囊：数字加粗更醒目 */
+.count-info{font-size:14px!important;font-weight:800!important;letter-spacing:.3px!important;}
+.filter-chip{font-size:12.5px!important;font-weight:700!important;}
+.page-btn{font-size:13.5px!important;font-weight:600!important;}
+.page-info{font-size:13px!important;font-weight:600!important;}
+/* 11) 线材标准标签：字色加深提升辨识度 */
+.std-tag{font-size:13px!important;font-weight:700!important;}
+/* 12) 命中高亮：更强对比 */
+mark.qmark{font-weight:800!important;}
 </style>
 </head>
 <body>
