@@ -54,13 +54,17 @@ tr:hover{background:#f8fafc;}
 .admin-stats{font-size:13px;color:#555;}
 .admin-stats span{color:#1a73e8;font-weight:600;margin:0 4px;}
 /* 后台明细编辑/删除按钮 */
-.col-op{text-align:center;white-space:nowrap;min-width:150px;}
+.col-op{text-align:center;white-space:nowrap;min-width:230px;}
+.admin-ins-btn{background:linear-gradient(135deg,#27AE60,#1E8E4E);color:#fff;border:none;padding:6px 9px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .18s;box-shadow:0 2px 6px rgba(30,142,78,.25);margin-right:4px;}
+.admin-ins-btn:hover{background:linear-gradient(135deg,#2ECC71,#27AE60);transform:translateY(-1px);box-shadow:0 4px 10px rgba(30,142,78,.35);}
+.admin-ins-btn:active{transform:scale(.95);}
 .admin-edit-btn{background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .18s;box-shadow:0 2px 6px rgba(37,99,235,.25);margin-right:4px;}
 .admin-edit-btn:hover{background:linear-gradient(135deg,#60A5FA,#3B82F6);transform:translateY(-1px);box-shadow:0 4px 10px rgba(37,99,235,.35);}
 .admin-edit-btn:active{transform:scale(.95);}
 .admin-del-btn{background:linear-gradient(135deg,#E5484D,#C72A2F);color:#fff;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .18s;box-shadow:0 2px 6px rgba(199,42,47,.25);}
 .admin-del-btn:hover{background:linear-gradient(135deg,#F05257,#D93A3F);transform:translateY(-1px);box-shadow:0 4px 10px rgba(199,42,47,.35);}
 .admin-del-btn:active{transform:scale(.95);}
+.admin-op-btns{display:inline-flex;gap:4px;flex-wrap:wrap;justify-content:center;}
 /* 编辑弹窗表单 */
 .edit-modal{width:min(680px,94vw);height:auto;max-height:86vh;background:#fff!important;padding:0;}
 .edit-modal .admin-modal-header{border-bottom:3px solid #E1E8F1;}
@@ -772,6 +776,7 @@ mark.qmark{font-weight:800!important;}
                 <tbody id="aRawBody"></tbody>
             </table>
         </div>
+        <div class="pagination" id="adminPagination" style="margin-top:10px;"></div>
         <div style="position:sticky;bottom:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 20px;background:#fff;border-top:1px solid #e5e7eb;z-index:10;">
             <button onclick="scrollAdminTable(-200)" style="width:36px;height:36px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#6b7280;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">‹</button>
             <span style="font-size:13px;color:#4b5563;">左右滑动查看更多列</span>
@@ -1363,14 +1368,50 @@ function adminLogout(){
 function renderAdminRaw(){
     document.getElementById('aRawHead').innerHTML=RAW_FIELDS.map(f=>fieldTh(f)).join('')+'<th class="col-op">操作</th>';
     const body=document.getElementById('aRawBody');
-    if(rawData.length===0){body.innerHTML='<tr><td colspan="'+(RAW_FIELDS.length+1)+'" class="no-result">暂无数据，请导入Excel</td></tr>';return;}
-    body.innerHTML=rawData.map((row,idx)=>'<tr>'+RAW_FIELDS.map(f=>{
-        const val=esc(row[f]||'');
-        if(f==='物料描述'||f==='备注')return '<td class="col-desc">'+val+'</td>';
-        if(f==='产品型号')return '<td class="col-model">'+val+'</td>';
-        return '<td>'+val+'</td>';
-    }).join('')+'<td class="col-op"><button class="admin-edit-btn" onclick="openEditRow('+idx+')">✎ 编辑</button><button class="admin-del-btn" onclick="deleteAdminRow('+idx+')">🗑 删除</button></td></tr>').join('');
+    const total=rawData.length;
+    if(total===0){body.innerHTML='<tr><td colspan="'+(RAW_FIELDS.length+1)+'" class="no-result">暂无数据，请导入Excel</td></tr>';renderAdminPagination(0);return;}
+    const totalPages=Math.max(1,Math.ceil(total/ADMIN_PAGE_SIZE));
+    if(adminPage>totalPages)adminPage=totalPages;
+    if(adminPage<1)adminPage=1;
+    const start=(adminPage-1)*ADMIN_PAGE_SIZE;
+    const pageData=rawData.slice(start,start+ADMIN_PAGE_SIZE);
+    body.innerHTML=pageData.map((row,pi)=>{
+        const idx=start+pi;
+        return '<tr>'+RAW_FIELDS.map(f=>{
+            const val=esc(row[f]||'');
+            if(f==='物料描述'||f==='备注')return '<td class="col-desc">'+val+'</td>';
+            if(f==='产品型号')return '<td class="col-model">'+val+'</td>';
+            return '<td>'+val+'</td>';
+        }).join('')+'<td class="col-op"><div class="admin-op-btns"><button class="admin-ins-btn" title="在上方插入一行" onclick="openInsertRow('+idx+',\'above\')">⬆插</button><button class="admin-ins-btn" title="在下方插入一行" onclick="openInsertRow('+idx+',\'below\')">⬇插</button><button class="admin-edit-btn" onclick="openEditRow('+idx+')">✎ 编辑</button><button class="admin-del-btn" onclick="deleteAdminRow('+idx+')">🗑 删除</button></div></td></tr>';
+    }).join('');
+    renderAdminPagination(total);
 }
+let adminPage=1;
+const ADMIN_PAGE_SIZE=10;
+function renderAdminPagination(total){
+    const el=document.getElementById('adminPagination');
+    if(!el)return;
+    if(total<=0){el.innerHTML='';return;}
+    const totalPages=Math.max(1,Math.ceil(total/ADMIN_PAGE_SIZE));
+    const start=(adminPage-1)*ADMIN_PAGE_SIZE+1;
+    const end=Math.min(adminPage*ADMIN_PAGE_SIZE,total);
+    let pages='';
+    const maxShow=7;
+    let pStart=Math.max(1,adminPage-3);
+    let pEnd=Math.min(totalPages,pStart+maxShow-1);
+    pStart=Math.max(1,pEnd-maxShow+1);
+    if(pStart>1){pages+='<button class="page-btn" onclick="adminGoToPage(1)">1</button>';if(pStart>2)pages+='<span class="page-dots">...</span>';}
+    for(let i=pStart;i<=pEnd;i++){pages+='<button class="page-btn'+(i===adminPage?' active':'')+'" onclick="adminGoToPage('+i+')">'+i+'</button>';}
+    if(pEnd<totalPages){if(pEnd<totalPages-1)pages+='<span class="page-dots">...</span>';pages+='<button class="page-btn" onclick="adminGoToPage('+totalPages+')">'+totalPages+'</button>';}
+    el.innerHTML='<div class="page-info">显示 '+start+'-'+end+' 条，共 '+total+' 条</div><div class="page-controls"><button class="page-btn page-nav" onclick="adminPrevPage()"'+(adminPage<=1?' disabled':'')+'>‹ 上一页</button>'+pages+'<button class="page-btn page-nav" onclick="adminNextPage()"'+(adminPage>=totalPages?' disabled':'')+'>下一页 ›</button></div><div class="page-info">第 '+adminPage+' / '+totalPages+' 页</div>';
+}
+function adminGoToPage(p){
+    const totalPages=Math.max(1,Math.ceil(rawData.length/ADMIN_PAGE_SIZE));
+    adminPage=Math.min(Math.max(1,p),totalPages);
+    renderAdminRaw();
+}
+function adminPrevPage(){if(adminPage>1){adminPage--;renderAdminRaw();}}
+function adminNextPage(){const totalPages=Math.max(1,Math.ceil(rawData.length/ADMIN_PAGE_SIZE));if(adminPage<totalPages){adminPage++;renderAdminRaw();}}
 function deleteAdminRow(idx){
     if(idx<0||idx>=rawData.length)return;
     const row=rawData[idx];
@@ -1389,9 +1430,11 @@ function deleteAdminRow(idx){
     }catch(e){alert('删除失败：'+e.message);}
 }
 let editIdx=-1;
+let insertMode=null; // null=编辑；'above'/'below'=在 editIdx 上方/下方插入新行
 function openEditRow(idx){
     if(idx<0||idx>=rawData.length)return;
     editIdx=idx;
+    insertMode=null;
     const row=rawData[idx];
     const fields=document.getElementById('editFields');
     fields.innerHTML=RAW_FIELDS.map(f=>{
@@ -1404,12 +1447,49 @@ function openEditRow(idx){
     document.getElementById('editModal').classList.add('active');
     document.body.style.overflow='hidden';
 }
+function openInsertRow(idx,position){
+    if(idx<0||idx>=rawData.length)return;
+    editIdx=idx;
+    insertMode=position;
+    const fields=document.getElementById('editFields');
+    // 空白表单
+    fields.innerHTML=RAW_FIELDS.map(f=>{
+        if(f==='物料描述'||f==='备注')return '<div class="edit-field"><label>'+esc(f)+'</label><textarea data-f="'+esc(f)+'" rows="3" placeholder="请输入'+esc(f)+'"></textarea></div>';
+        return '<div class="edit-field"><label>'+esc(f)+'</label><input type="text" data-f="'+esc(f)+'" placeholder="请输入'+esc(f)+'"></div>';
+    }).join('');
+    const posText=(position==='above')?'上方':'下方';
+    document.getElementById('editTitle').textContent='➕ 插入新行（第 '+(idx+1)+' 条'+posText+'）';
+    document.getElementById('editOverlay').classList.add('active');
+    document.getElementById('editModal').classList.add('active');
+    document.body.style.overflow='hidden';
+}
 function closeEditModal(){
     document.getElementById('editOverlay').classList.remove('active');
     document.getElementById('editModal').classList.remove('active');
     document.body.style.overflow='';
 }
 function saveEditRow(){
+    if(editIdx<0)return;
+    if(insertMode){
+        // 插入模式：收集新行数据并在 editIdx 上方/下方插入
+        const newRow={};
+        document.querySelectorAll('#editFields [data-f]').forEach(el=>{
+            const f=el.getAttribute('data-f');
+            newRow[f]=el.value.trim();
+        });
+        const insertPos=(insertMode==='above')?editIdx:editIdx+1;
+        rawData.splice(insertPos,0,newRow);
+        const dt=new Date();
+        const p=n=>String(n).padStart(2,'0');
+        const today=dt.getFullYear()+'-'+p(dt.getMonth()+1)+'-'+p(dt.getDate());
+        historyData.push({'日期':today,'修订内容':'插入新明细：'+(newRow['料号']||newRow['物料描述']||newRow['产品系列']||'（第'+(insertPos+1)+'条）'),'编辑人':'后台管理员'});
+        setDirty();
+        renderAdminRaw();
+        updateAdminStats();
+        closeEditModal();
+        alert('已插入 1 条新明细。\n\n请点击「💾 保存到浏览器」保存，再「📤 导出JSON」上传 GitHub 线上才会同步。');
+        return;
+    }
     if(editIdx<0||editIdx>=rawData.length)return;
     try{
         const row=rawData[editIdx];
