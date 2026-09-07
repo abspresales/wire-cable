@@ -847,25 +847,41 @@ function switchSubTab(tab){
 let cbLineCtrl=null,cbSeriesCtrl=null,cbTypeCtrl=null,cbLengthCtrl=null,cbStandardCtrl=null;
 function lineOf(row){return String(row['产品线']||'').trim();}
 function seriesOf(row){return String(row['产品系列']||'').trim();}
-// 根据当前所选产品线，计算系列下拉可选项（选择产品线后只带出该产品线对应的系列）
-function seriesOptionsForLine(){
-    const ln=getComboboxValue('qLine');
+// ===== 预估站式「上下文收敛」下拉逻辑 =====
+// 层级前向收敛：上游维度收敛下游，但下游不反向收敛上游（最高层恒全量，避免选了下游锁死上游）。
+// 每个下拉可选项 = 在「其上游已筛维度」约束下该字段的真实出现值；恒以「全部XX」带头，选中值失效自动置回全部。
+const QUERY_DEFS={
+    qLine:      {field:'产品线',  def:'全部产品线', up:[]},
+    qSeries:    {field:'产品系列',def:'全部系列',   up:['qLine']},
+    qType:      {field:'线材类型',def:'全部类型',   up:['qLine','qSeries']},
+    qLength:    {field:'线材长度',def:'全部长度',   up:['qLine','qSeries','qType']},
+    qStandard:  {field:'线材标准',def:'全部标准',   up:['qLine','qSeries','qType']}
+};
+// 计算某下拉可选项：仅用其上游已筛维度过滤数据，取该字段真实出现值（保持出现顺序）
+function fieldUniqueOptions(fieldId){
+    const cfg=QUERY_DEFS[fieldId];
     let rows=rawData;
-    if(ln&&ln!=='全部产品线')rows=rows.filter(r=>lineOf(r)===ln.trim());
-    return ['全部系列',...unique(rows.map(seriesOf).filter(Boolean))];
+    (cfg.up||[]).forEach(parent=>{
+        const cur=getComboboxValue(parent);
+        if(cur&&cur!==QUERY_DEFS[parent].def){
+            rows=rows.filter(r=>String(r[QUERY_DEFS[parent].field]||'').trim()===cur.trim());
+        }
+    });
+    return [cfg.def,...unique(rows.map(r=>String(r[cfg.field]||'').trim()).filter(Boolean))];
 }
-function updateSeriesCascade(resetValue){
-    // 依据产品线联动系列下拉
-    if(!cbSeriesCtrl)return;
-    cbSeriesCtrl.setOptions(seriesOptionsForLine());
-    if(resetValue!==false){ /* 保持当前系列值，交给 setOptions 内部判断是否需重置 */ }
+// 重建全部下拉：任一筛选变化后调用（setOptions 内部会自动把失效的选中值置回「全部」）
+function rebuildAllQueryOptions(){
+    Object.keys(QUERY_DEFS).forEach(id=>{
+        const ctrl={qLine:cbLineCtrl,qSeries:cbSeriesCtrl,qType:cbTypeCtrl,qLength:cbLengthCtrl,qStandard:cbStandardCtrl}[id];
+        if(ctrl)ctrl.setOptions(fieldUniqueOptions(id));
+    });
 }
 function initQueryDropdowns(){
-    cbLineCtrl=initCombobox('qLine',['全部产品线',...unique(rawData.map(lineOf).filter(Boolean))]);
-    cbSeriesCtrl=initCombobox('qSeries',['全部系列',...unique(rawData.map(seriesOf).filter(Boolean))]);
-    cbTypeCtrl=initCombobox('qType',['全部类型',...CABLE_TYPES]);
-    cbLengthCtrl=initCombobox('qLength',['全部长度',...unique(rawData.map(d=>d['线材长度']).filter(Boolean))]);
-    cbStandardCtrl=initCombobox('qStandard',['全部标准',...unique(rawData.map(d=>d['线材标准']).filter(Boolean))]);
+    cbLineCtrl=initCombobox('qLine',fieldUniqueOptions('qLine'));
+    cbSeriesCtrl=initCombobox('qSeries',fieldUniqueOptions('qSeries'));
+    cbTypeCtrl=initCombobox('qType',fieldUniqueOptions('qType'));
+    cbLengthCtrl=initCombobox('qLength',fieldUniqueOptions('qLength'));
+    cbStandardCtrl=initCombobox('qStandard',fieldUniqueOptions('qStandard'));
 }
 // ===== 自定义可搜索下拉组件 =====
 function initCombobox(id, options){
@@ -877,7 +893,9 @@ function initCombobox(id, options){
     if(def&&!options.includes(def)){options=[def,...options];}
     function renderList(filter){
         const kw=(filter||'').trim().toLowerCase();
-        const filtered=(kw&&kw!==def.toLowerCase())?options.filter(o=>String(o).toLowerCase().includes(kw)):options;
+        let filtered=(kw&&kw!==def.toLowerCase())?options.filter(o=>String(o).toLowerCase().includes(kw)):options;
+        // 去掉已选值本身：当前下拉已选中的具体值不再作为可选项出现（保留「全部」默认项便于复位）
+        if(input.value&&input.value!==def&&options.includes(input.value)){filtered=filtered.filter(o=>o!==input.value);}
         if(filtered.length===0){list.innerHTML='<div class="combobox-empty">无匹配选项</div>';return;}
         list.innerHTML=filtered.map(o=>'<div class="combobox-item'+(input.value===o?' selected':'')+'" data-value="'+esc(o)+'">'+esc(o)+'</div>').join('');
     }
@@ -885,7 +903,7 @@ function initCombobox(id, options){
         if(cb.classList.contains('disabled'))return;
         closeAllCombobox();
         cb.classList.add('open');
-        renderList(input.value);
+        renderList(''); // 打开时列出全部候选项（剔除已选值），避免把已选值当作搜索词过滤
         list.scrollTop=0;
         fitListWidth();
     }
@@ -995,11 +1013,11 @@ function highlightWord(text,keywords){
     return t;
 }
 function onQueryFilter(){
-    // 级联：产品线变化时，联动更新系列下拉（只带出该产品线下对应的系列）
-    updateSeriesCascade();
+    // 预估站式：任一筛选变化 -> 基于当前其它已筛维度重建所有下拉可选项（剔除已筛掉的值）
     const type=getComboboxValue('qType');
     if(type.includes('到屏')){setComboboxDisabled('qLength',false);}
     else{setComboboxDisabled('qLength',true);clearCombobox('qLength');}
+    rebuildAllQueryOptions();
     currentPage=1;
     renderActiveFilters();
     renderQueryTable();
@@ -1011,7 +1029,7 @@ function resetQueryFilter(){
     setComboboxDisabled('qLength',true);
     clearCombobox('qLength');
     clearCombobox('qStandard');
-    updateSeriesCascade(); // 恢复系列全量选项
+    rebuildAllQueryOptions(); // 恢复全量选项
     currentPage=1;
     renderActiveFilters();
     renderQueryTable();
@@ -1019,10 +1037,9 @@ function resetQueryFilter(){
 // 清除某个下拉条件
 function removeFilterChip(id){
     clearCombobox(id);
-    // 级联：清除产品线后恢复系列全量选项
-    if(id==='qLine')updateSeriesCascade();
     // 长度下拉需联动禁用逻辑
     if(id==='qLength')setComboboxDisabled('qLength',true);
+    rebuildAllQueryOptions(); // 基于其余已筛维度重建所有下拉可选项
     currentPage=1;
     renderActiveFilters();
     renderQueryTable();
