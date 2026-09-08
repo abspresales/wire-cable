@@ -856,6 +856,16 @@ html[data-theme="dark"] .sap-copy{background:#1c2430!important;border:1px dashed
 html[data-theme="dark"] .sap-copy:hover{background:#2b3646!important;border-color:var(--orange-500)!important;color:#f4b15f!important;}
 html[data-theme="dark"] mark.qmark{color:#f5c985!important;}
 html[data-theme="dark"] .std-tag{color:#cfd8e4!important;}
+/* ===== 后台维护弹窗 深色（标题/登录标题提亮，可读） ===== */
+html[data-theme="dark"] .admin-modal-header>span{color:#e8edf3!important;}
+html[data-theme="dark"] .login-wrap h3{color:#e8edf3!important;}
+html[data-theme="dark"] .admin-modal-header{background:#1c2430!important;border-bottom-color:#2b3646!important;}
+html[data-theme="dark"] .login-wrap{border-color:#2b3646!important;border-top-color:#2b3646!important;}
+html[data-theme="dark"] .login-wrap input{background:#141a22!important;border-color:#34404f!important;color:#e2e9f2!important;}
+html[data-theme="dark"] .admin-stats{color:#8fa0b3!important;}
+html[data-theme="dark"] .admin-scroll-bar{background:#1c2430!important;border-top-color:#2b3646!important;}
+html[data-theme="dark"] .admin-scroll-bar button{background:#2b3646!important;border-color:#34404f!important;color:#c9d3df!important;}
+html[data-theme="dark"] .admin-scroll-bar span{color:#8fa0b3!important;}
 </style>
 </head>
 <body>
@@ -942,7 +952,7 @@ html[data-theme="dark"] .std-tag{color:#cfd8e4!important;}
             </table>
         </div>
         <div class="pagination" id="adminPagination" style="margin-top:10px;"></div>
-        <div style="position:sticky;bottom:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 20px;background:#fff;border-top:1px solid #e5e7eb;z-index:10;">
+        <div class="admin-scroll-bar" style="position:sticky;bottom:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 20px;background:#fff;border-top:1px solid #e5e7eb;z-index:10;">
             <button onclick="scrollAdminTable(-200)" style="width:36px;height:36px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#6b7280;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">‹</button>
             <span style="font-size:13px;color:#4b5563;">左右滑动查看更多列</span>
             <button onclick="scrollAdminTable(200)" style="width:36px;height:36px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#6b7280;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">›</button>
