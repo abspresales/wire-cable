@@ -226,10 +226,6 @@ tr:hover{background:#f8fafc;}
   .page-info{font-size:12px;}
   .page-btn{min-width:36px;height:36px;font-size:13px;}
   .page-nav{padding:0 10px;}
-  div[onclick="openHistoryModal()"],div[onclick="openAdminModal()"]{width:22px;height:22px;}
-  div[onclick="openHistoryModal()"] svg,div[onclick="openAdminModal()"] svg{width:11px;height:11px;}
-  div[onclick="openHistoryModal"]{bottom:44px;right:12px;}
-  div[onclick="openAdminModal"]{bottom:14px;right:12px;}
 }
 
 /* ===== 增强：全局搜索框 ===== */
@@ -299,6 +295,9 @@ mark.qmark{background:#fdecd0;color:#a25200;padding:0 2px;border-radius:2px;font
   --text-secondary:#A9B6C9;
   --text-muted:#7C8AA0;
   --border-subtle:#334155;
+  --bg-card:#1E293B;       /* 卡片/按钮背景-深(对齐工具中心) */
+  --bg-card-hover:#273449;
+  --border-hover:#475569;
 }
 :root[data-theme="light"]{
   --bg-deep:#EFF4FB;      /* 页面主背景-浅 */
@@ -307,6 +306,9 @@ mark.qmark{background:#fdecd0;color:#a25200;padding:0 2px;border-radius:2px;font
   --text-secondary:#3E4E64;
   --text-muted:#6E7E93;
   --border-subtle:#E3EAF3;
+  --bg-card:#FFFFFF;       /* 卡片/按钮背景-浅(对齐工具中心) */
+  --bg-card-hover:#F3F7FC;
+  --border-hover:#CBD8E8;
 }
 html{scroll-behavior:smooth;}
 ::selection{background:rgba(243,156,18,.22);color:inherit;}
@@ -583,26 +585,32 @@ mark.qmark{background:linear-gradient(180deg,transparent 60%,#FCE0B0 60%);color:
 .dirty-indicator{color:#C0392B;}
 .clean-indicator{color:#1E8E4E;}
 
-/* ---------- 右下角悬浮球：橙 + 深蓝 ---------- */
-div[onclick="openHistoryModal()"]{
-  background:linear-gradient(135deg,var(--orange-500),var(--orange-600))!important;
-  box-shadow:0 6px 18px rgba(230,126,34,.45),0 0 0 4px rgba(243,156,18,.18)!important;
-  transition:transform .28s var(--e-spr),box-shadow .28s var(--e-sm)!important;
-  border:2px solid #fff;
+/* ---------- 右上角操作按钮：对齐工具中心顶部(刷新/首页/深色)按钮风格 ---------- */
+.top-pill-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;
+  background:var(--bg-card);
+  border:1px solid var(--border-subtle);
+  color:var(--text-secondary);
+  font-size:12px;font-weight:500;
+  font-family:inherit;line-height:1;
+  cursor:pointer;user-select:none;white-space:nowrap;
+  transition:background .2s ease,border-color .2s ease,color .2s ease,transform .2s ease;
 }
-div[onclick="openHistoryModal()"]:hover{
-  background:linear-gradient(135deg,#FBAE2E,#ED8525)!important;
-  box-shadow:0 10px 26px rgba(230,126,34,.55),0 0 0 8px rgba(243,156,18,.22)!important;
+.top-pill-btn:hover{
+  background:var(--bg-card-hover);
+  border-color:var(--border-hover);
+  color:var(--text-primary);
+  transform:translateY(-1px);
 }
-div[onclick="openAdminModal()"]{
-  background:linear-gradient(135deg,#5A6B82,#414E63)!important;
-  box-shadow:0 6px 18px rgba(65,78,99,.50),0 0 0 4px rgba(90,107,130,.20)!important;
-  transition:transform .28s var(--e-spr),box-shadow .28s var(--e-sm)!important;
-  border:2px solid #fff;
-}
-div[onclick="openAdminModal()"]:hover{
-  background:linear-gradient(135deg,#6C7E96,#4E5C73)!important;
-  box-shadow:0 10px 26px rgba(65,78,99,.60),0 0 0 8px rgba(90,107,130,.25)!important;
+.top-pill-btn:active{transform:translateY(0);}
+.top-pill-btn svg{width:14px;height:14px;stroke:currentColor;flex-shrink:0;}
+/* 右上角操作按钮容器：固定右上角，横向排列 */
+.top-actions-fixed{position:fixed;top:14px;right:16px;display:flex;align-items:center;gap:10px;z-index:1000;}
+@media(max-width:640px){
+  .top-actions-fixed{top:auto;bottom:16px;right:12px;left:12px;justify-content:flex-end;gap:8px;}
+  .top-pill-btn{font-size:12px;padding:13px 14px;}
+  .top-pill-btn svg{width:15px;height:15px;}
 }
 
 /* ---------- 空状态 ---------- */
@@ -630,8 +638,6 @@ div[onclick="openAdminModal()"]:hover{
 @media(max-width:640px){
   .search-bar:hover,.filter-bar:hover,.pagination:hover,.admin-header:hover{transform:none;}
   .combobox-item:hover{transform:none;}
-  /* 移动端悬浮按钮放大到触摸友好尺寸(≥44px)，覆盖内联 width/height */
-  div[onclick="openHistoryModal()"],div[onclick="openAdminModal()"]{width:44px!important;height:44px!important;font-size:18px!important;}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important;scroll-behavior:auto!important;}
@@ -1982,11 +1988,16 @@ document.addEventListener('keydown', function(e) {
 
 
 </script>
-<div onclick="openHistoryModal()" style="position:fixed;bottom:60px;right:18px;width:26px;height:26px;background:#597a9b;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,0.25);color:#fff;z-index:1000;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
-</div>
-<div onclick="openAdminModal()" style="position:fixed;bottom:24px;right:18px;width:26px;height:26px;background:#193a5b;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,0.25);color:#fff;z-index:1000;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+<!-- 右上角操作按钮：对齐工具中心顶部按钮风格（更新履历 / 后台维护） -->
+<div class="top-actions-fixed">
+  <div class="top-pill-btn" onclick="openHistoryModal()" title="更新履历" role="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+    <span>更新履历</span>
+  </div>
+  <div class="top-pill-btn" onclick="openAdminModal()" title="后台维护" role="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>后台维护</span>
+  </div>
 </div>
 
 <!-- 更新履历浮窗 -->
