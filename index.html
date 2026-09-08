@@ -630,6 +630,8 @@ div[onclick="openAdminModal()"]:hover{
 @media(max-width:640px){
   .search-bar:hover,.filter-bar:hover,.pagination:hover,.admin-header:hover{transform:none;}
   .combobox-item:hover{transform:none;}
+  /* 移动端悬浮按钮放大到触摸友好尺寸(≥44px)，覆盖内联 width/height */
+  div[onclick="openHistoryModal()"],div[onclick="openAdminModal()"]{width:44px!important;height:44px!important;font-size:18px!important;}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important;scroll-behavior:auto!important;}
