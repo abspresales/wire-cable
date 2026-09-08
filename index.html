@@ -2027,6 +2027,8 @@ document.addEventListener('keydown', function(e) {
   var inFrame=(window.self!==window.top);
   if(inFrame&&brandBar){brandBar.style.display='none';}
   if(inFrame){document.documentElement.className+=' in-frame';}
+  // 被工具中心嵌套时，隐藏子站自己的右上角「更新履历/后台维护」按钮（父站顶栏已提供同名按钮并委托给本站）
+  if(inFrame){var taf=document.querySelector('.top-actions-fixed');if(taf){taf.style.display='none';}}
   function apply(){
     var t=localStorage.getItem(KEY)||'light';   // 默认浅色
     if(t!=='dark') t='light';
@@ -2037,6 +2039,11 @@ document.addEventListener('keydown', function(e) {
     var d=e.data||{};
     if(d&&d.type==='presales-theme'&&(d.theme==='dark'||d.theme==='light')){
       localStorage.setItem(KEY,d.theme);apply();
+    }
+    // 父站顶栏「更新履历/后台维护」按钮 → 委托本人打开对应弹窗（各站函数名不同，由本站自行响应）
+    if(d&&d.type==='presales-open-modal'){
+      if(d.modal==='history'&&typeof openHistoryModal==='function'){openHistoryModal();}
+      if(d.modal==='admin'&&typeof openAdminModal==='function'){openAdminModal();}
     }
   });
   window.addEventListener('storage',function(e){
