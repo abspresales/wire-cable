@@ -757,6 +757,13 @@ mark.qmark{font-weight:800!important;}
 [data-theme="dark"] .history-table th{background:#202a38!important;color:#e8edf3!important;border-bottom-color:#2b3646!important;}
 [data-theme="dark"] .history-table td{border-bottom-color:#25303d!important;}
 [data-theme="dark"] .history-table tr:hover{background:#232d3b;}
+/* 后台维护数据表头：与其它站统一为 #202a38，与内容区 #1c2430 区分（否则落到通配 th 的 #1c2430） */
+[data-theme="dark"] #adminTableWrap table th{background:#202a38!important;color:#e8edf3!important;border-bottom-color:#2b3646!important;}
+[data-theme="dark"] #adminTableWrap table td{color:#c9d3df!important;border-bottom-color:#25303d!important;}
+[data-theme="dark"] #adminTableWrap table tbody tr:nth-child(even){background:#202731!important;}
+[data-theme="dark"] #adminTableWrap table tbody tr:hover{background:#232d3b!important;}
+/* 后台登录框「登录」按钮内联 background:#fff 白底 → 深色暗化（保证深色下无白底残留） */
+[data-theme="dark"] #adminLogin .login-wrap .btn,[data-theme="dark"] .login-wrap .btn{background:#232d3b!important;color:#c9d3df!important;border-color:#34404f!important;box-shadow:none!important;}
 
 /* 按钮浅色类 */
 [data-theme="dark"] .btn-reset{background:#1c2430;color:#8ec9ff;border-color:#34404f;}
