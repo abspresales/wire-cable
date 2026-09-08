@@ -320,6 +320,18 @@ html{scroll-behavior:smooth;}
 ::-webkit-scrollbar-thumb{background:#cfd6e1;border-radius:99px;border:2px solid transparent;background-clip:padding-box;}
 ::-webkit-scrollbar-thumb:hover{background:#a4b1c4;}
 
+/* ---------- 顶部品牌抬头：背景对齐父站（浅=父站浅背景，深=父站深背景） ---------- */
+#brandBar{
+  display:flex;align-items:center;
+  padding:13px 24px;
+  background:var(--bg-deep);
+  border-bottom:1px solid var(--border-subtle);
+}
+#brandBar .brand-left{display:flex;align-items:center;gap:13px;}
+#brandBar .absen-logo{height:32px;width:auto;display:block;color:var(--text-primary);}
+#brandBar .brand-sep{display:inline-block;width:1px;align-self:center;height:26px;background:var(--text-primary);opacity:.35;}
+#brandBar h1{font-size:20px;font-weight:800;letter-spacing:1.5px;color:var(--text-primary);margin:0;line-height:1.2;}
+
 /* ---------- 页面底纹：对齐父站工具中心背景 ---------- */
 body{
   background:var(--bg-deep)!important;
@@ -462,8 +474,8 @@ body{
 #qTable td{border-bottom:1px solid #ECF0F6;color:var(--ink);font-weight:500;}
 #qTable tbody tr{transition:background .16s var(--e-sm);}
 #qTable tbody tr:nth-child(even){background:#FAFCFE;}
-#qTable tbody tr:hover,#qTable tbody tr:nth-child(even):hover{background:#FDF4E3;}
-#qTable tbody tr:hover td.col-freeze{background:#FCE7BD;}
+#qTable tbody tr:hover,#qTable tbody tr:nth-child(even):hover{background:#EFF4FB;}
+#qTable tbody tr:hover td.col-freeze{background:#E3EBF5;}
 #qTable td.col-freeze{background:#F4F7FB;border-right:1px solid #D7E0EC;}
 #qTable tbody tr:nth-child(even) td.col-freeze{background:#F9FBFD;}
 #qBody tr{animation:rowIn .34s var(--e-out) backwards;}
@@ -494,7 +506,7 @@ body{
   color:var(--navy-800);font-weight:600;
   transition:all .16s var(--e-sm);
 }
-.sap-copy:hover{background:#FDF4E3;border-color:var(--orange-500);color:var(--orange-700);}
+.sap-copy:hover{background:#E6EEF8;border-color:#AFC5DE;color:var(--navy-800);}
 .sap-copy:active{transform:scale(.95);}
 .sap-copy.copied{background:linear-gradient(135deg,#27AE60,#1E8E4E);color:#fff;border-color:#1E8E4E;box-shadow:0 3px 10px rgba(30,142,78,.35);animation:pop .4s var(--e-spr);}
 @keyframes pop{0%{transform:scale(1);}45%{transform:scale(1.10);}100%{transform:scale(1);}}
@@ -608,7 +620,7 @@ div[onclick="openAdminModal()"]:hover{
 #qTable td.col-freeze{color:var(--navy-800);font-weight:700;}
 /* 隔行斑马纹更柔和，提升可读性 */
 #qTable tbody tr:nth-child(even){background:#F7FAFD;}
-#qTable tbody tr:hover{background:#FDF4E3;}
+#qTable tbody tr:hover{background:#EFF4FB;}
 /* 标准标签保持五色，文字加粗加强辨识 */
 #qTable .std-tag{font-weight:700;}
 /* 命中高亮更醒目 */
@@ -819,9 +831,51 @@ html[data-theme="dark"] td-blue{background:#14263a!important;color:#7bb3f0!impor
 html[data-theme="dark"] td-green{background:#142c24!important;color:#5fd3a0!important;border-color:#2b5242!important;}
 html[data-theme="dark"] td-purple{background:#251c38!important;color:#b594f0!important;border-color:#423467!important;}
 html[data-theme="dark"] td-gray{background:#2b3646!important;color:#a7b4c4!important;border-color:#3a4656!important;}
+
+/* ===== 深色背景修正（覆盖浅色高特异性规则：偶数列冻结列/表头/悬停）===== */
+html[data-theme="dark"] #qTable tbody tr:nth-child(even) td.col-freeze{background:#1c2430!important;}
+html[data-theme="dark"] #qTable tbody tr:nth-child(even):hover,
+html[data-theme="dark"] #qTable tbody tr:nth-child(even):hover td{background:#2b3646!important;}
+html[data-theme="dark"] #qTable tbody tr:hover td.col-freeze{background:#2b3646!important;}
+html[data-theme="dark"] #qTable tbody tr:nth-child(even):hover td.col-freeze{background:#2b3646!important;}
+html[data-theme="dark"] #qTable thead th.col-freeze{background:#26313f!important;}
+html[data-theme="dark"] #qTable tbody tr{background:transparent!important;}
+html[data-theme="dark"] #qTable table,html[data-theme="dark"] #qTable{background:transparent!important;}
+html[data-theme="dark"] #qTable thead th .th-zh{color:#e8edf3!important;}
+html[data-theme="dark"] #qTable thead th .th-en{color:#8fa0b3!important;}
+html[data-theme="dark"] .th-zh{color:#e8edf3!important;}
+html[data-theme="dark"] .th-en{color:#8fa0b3!important;}
+html[data-theme="dark"] .filter-item label{color:#b9c6d8!important;}
+html[data-theme="dark"] .combobox-input,html[data-theme="dark"] .search-bar input{color:#e2e9f2!important;}
+html[data-theme="dark"] .combobox-item,html[data-theme="dark"] .combobox-item span{color:#c9d3df!important;}
+html[data-theme="dark"] .search-bar input::placeholder{color:#8fa0b3!important;}
+html[data-theme="dark"] .af-lab,html[data-theme="dark"] .filter-chip,html[data-theme="dark"] .count-info{color:#9fc7f5!important;}
+html[data-theme="dark"] .page-info{color:#aebbcd!important;}
+html[data-theme="dark"] .search-tip{color:#8fa0b3!important;}
+html[data-theme="dark"] .sap-copy{background:#1c2430!important;border:1px dashed #3a4a5f!important;color:#8ec9ff!important;}
+html[data-theme="dark"] .sap-copy:hover{background:#2b3646!important;border-color:var(--orange-500)!important;color:#f4b15f!important;}
+html[data-theme="dark"] mark.qmark{color:#f5c985!important;}
+html[data-theme="dark"] .std-tag{color:#cfd8e4!important;}
 </style>
 </head>
 <body>
+
+<!-- 顶部品牌抬头：独立打开时显示（Absen logo ｜ 标准线材速查），被工具中心 iframe 嵌套时隐藏 -->
+<div id="brandBar">
+  <div class="brand-left">
+    <svg class="absen-logo" viewBox="0 0 116 38.24" xmlns="http://www.w3.org/2000/svg" aria-label="Absen">
+      <g transform="translate(-214.554 -381.569)">
+        <path d="M214.554,448.822c.188-.406.367-.8.548-1.184q2.564-5.5,5.128-11,2-4.3,4.01-8.594c.11-.235.221-.469.325-.706a.2.2,0,0,1,.213-.142q4.962.005,9.925,0c.125,0,.16.064.2.154q.884,1.9,1.771,3.8l4.976,10.672q1.595,3.421,3.187,6.843c.023.05.041.1.069.172H244.7q-3.441,0-6.883,0a.275.275,0,0,1-.3-.189c-.624-1.356-1.26-2.706-1.886-4.061a.242.242,0,0,0-.26-.16q-5.637,0-11.274,0a.264.264,0,0,0-.282.184c-.627,1.361-1.263,2.717-1.894,4.076a.2.2,0,0,1-.208.15q-3.536-.006-7.073,0C214.626,448.833,214.607,448.829,214.554,448.822Zm19.061-8.551-3.882-8.325-3.881,8.325Z" transform="translate(0 -38.395)" fill="currentColor"/>
+        <path d="M422.345,395.147v-.341q0-2.7,0-5.4c0-.5,0-.5.483-.59a10.622,10.622,0,0,1,3.926.013,10.938,10.938,0,0,1,8.843,9.7,10.96,10.96,0,0,1-1.421,6.425,10.863,10.863,0,0,1-8.416,5.411,10.744,10.744,0,0,1-6.432-1.41,11.294,11.294,0,0,1-1.962-1.451,11.006,11.006,0,0,1-1.636-1.908,10.746,10.746,0,0,1-1.025-1.894,9.136,9.136,0,0,1-.671-2.379,14.307,14.307,0,0,1-.149-1.734q-.033-8.841-.041-17.682a.482.482,0,0,1,.007-.188.381.381,0,0,1,.14-.138c.027-.018.074,0,.112,0h5.4c.277,0,.278,0,.278.267q0,8.157,0,16.315c0,.462,0,.924,0,1.386a4.775,4.775,0,0,0,1.609,3.666,4.985,4.985,0,1,0,5.015-8.381,4.975,4.975,0,0,0-3.47.052C422.75,394.948,422.572,395.043,422.345,395.147Z" transform="translate(-167.705)" fill="#dc5f00"/>
+        <path d="M574.934,427.211a4.764,4.764,0,0,0-1.361,1.528,4.559,4.559,0,0,0-.364,3.3,7.5,7.5,0,0,0,1.355,2.754,39.534,39.534,0,0,0,3.978,4.512c.917.91,1.83,1.828,2.678,2.8a12.582,12.582,0,0,1,2.715,4.866,8.63,8.63,0,0,1,.317,3.082,9.368,9.368,0,0,1-2.4,5.733,7.093,7.093,0,0,1-3.559,2.064,12.847,12.847,0,0,1-3.215.357q-4.078,0-8.157,0H566.7v-6.516h.233q3.945,0,7.891,0a2.64,2.64,0,0,0,2.578-1.768,2.561,2.561,0,0,0-.482-2.582c-.476-.6-.993-1.166-1.5-1.738q-1.395-1.569-2.8-3.127c-.719-.793-1.462-1.564-2.181-2.358a13.194,13.194,0,0,1-3.265-6.058,11.883,11.883,0,0,1-.218-3.528,14.6,14.6,0,0,1,.633-3.153c.035-.114.074-.181.216-.18q3.518.007,7.035,0C574.857,427.2,574.876,427.2,574.934,427.211Z" transform="translate(-296.345 -38.396)" fill="currentColor"/>
+        <path d="M706.867,433.455l-14.725,8.992a6.237,6.237,0,0,0,1.493,1.049,6.918,6.918,0,0,0,2.62.7,9.09,9.09,0,0,0,4.247-.793,20.216,20.216,0,0,0,2.787-1.46l.2-.12,2.109,4.331c-.365.218-.718.439-1.081.642a16.431,16.431,0,0,1-5.007,1.862,14.623,14.623,0,0,1-4.44.176,11.134,11.134,0,0,1-7.155-3.688,10.191,10.191,0,0,1-2.554-5.29,10.391,10.391,0,0,1,3.206-9.517,10.9,10.9,0,0,1,3.554-2.315,11.729,11.729,0,0,1,3.128-.726,13.143,13.143,0,0,1,3.088.049,10.845,10.845,0,0,1,5.184,2.136,12.589,12.589,0,0,1,3.3,3.876C706.838,433.386,706.849,433.416,706.867,433.455Zm-16.452,5.365,9.611-5.8a3.667,3.667,0,0,0-1-.815,5.3,5.3,0,0,0-3.01-.578,5.82,5.82,0,0,0-3.828,1.7A6.433,6.433,0,0,0,690.416,438.82Z" transform="translate(-396.07 -38.426)" fill="currentColor"/>
+        <path d="M842.37,448.9h-5.215V427.292h4.813v3.143l.071.048c.05-.069.1-.141.151-.205a7.843,7.843,0,0,1,1.921-1.651,6.041,6.041,0,0,1,2.562-.815,6.839,6.839,0,0,1,5.915,2.128,6.7,6.7,0,0,1,1.829,3.839c.037.409.071.821.071,1.231q.008,6.836,0,13.672v.22h-5.283v-.276q0-6.4-.006-12.8a7.825,7.825,0,0,0-.117-1.3,3.426,3.426,0,0,0-2.677-2.616,3.372,3.372,0,0,0-2.962.813,2.861,2.861,0,0,0-.97,1.958c-.058.789-.1,1.58-.1,2.371-.01,3.873,0,7.745,0,11.618Z" transform="translate(-523.938 -38.477)" fill="currentColor"/>
+      </g>
+    </svg>
+    <span class="brand-sep"></span>
+    <h1>标准线材速查</h1>
+  </div>
+</div>
 
 <!-- 线材速查页 -->
 <div id="pageQuery" class="page active">
@@ -1931,6 +1985,10 @@ document.addEventListener('keydown', function(e) {
 // ===== 深色/浅色主题切换（默认浅色，统一键 presales-theme，支持跨站同步）=====
 (function(){
   var KEY='presales-theme';   // 统一主题键：工具中心/全部子站共用
+  // 被工具中心 iframe 嵌套时隐藏自己的顶部抬头（避免与父站「Absen logo ｜ 站名」重复），独立打开时正常显示
+  var brandBar=document.getElementById('brandBar');
+  var inFrame=(window.self!==window.top);
+  if(inFrame&&brandBar){brandBar.style.display='none';}
   function apply(){
     var t=localStorage.getItem(KEY)||'light';   // 默认浅色
     if(t!=='dark') t='light';
