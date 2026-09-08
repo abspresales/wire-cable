@@ -607,8 +607,11 @@ mark.qmark{background:linear-gradient(180deg,transparent 60%,#FCE0B0 60%);color:
 .top-pill-btn svg{width:14px;height:14px;stroke:currentColor;flex-shrink:0;}
 /* 右上角操作按钮容器：固定右上角，横向排列 */
 .top-actions-fixed{position:fixed;top:14px;right:16px;display:flex;align-items:center;gap:10px;z-index:1000;}
+/* 被工具中心 iframe 嵌套时：父站顶栏(56px,z-index:20)会盖住 top:14，需把按钮下移到顶栏下方(56px+12px 间隙) */
+html.in-frame .top-actions-fixed{top:68px;}
 @media(max-width:640px){
   .top-actions-fixed{top:auto;bottom:16px;right:12px;left:12px;justify-content:flex-end;gap:8px;}
+  html.in-frame .top-actions-fixed{top:auto;}
   .top-pill-btn{font-size:12px;padding:13px 14px;}
   .top-pill-btn svg{width:15px;height:15px;}
 }
@@ -2023,6 +2026,7 @@ document.addEventListener('keydown', function(e) {
   var brandBar=document.getElementById('brandBar');
   var inFrame=(window.self!==window.top);
   if(inFrame&&brandBar){brandBar.style.display='none';}
+  if(inFrame){document.documentElement.className+=' in-frame';}
   function apply(){
     var t=localStorage.getItem(KEY)||'light';   // 默认浅色
     if(t!=='dark') t='light';
